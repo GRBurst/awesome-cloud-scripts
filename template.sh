@@ -11,13 +11,14 @@ help() (
     echo    "Explain what this script does and exit."
     echo    "Describes the nix-shell parameter and provides template for scripts."
 
-    echo -e "\nExamples:"
+    echo -e "\nExamples"
     echo    "- Print information about nix-shell parameters:"
     echo -e "    ${0##*/}\n"
 
     echo    "Required environment:"
     echo    "  - ENV1 variable"
     echo    "  - ENV2 variable"
+
     exit 1
 )
 
