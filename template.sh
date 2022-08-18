@@ -7,16 +7,32 @@
 set -Eeuo pipefail
 
 help() (
-    echo "${0##*/}"
-    echo "Explain what this script does and exit."
-    echo "Describes the nix-shell parameter and provides template for scripts."
+    echo -e "\n~~~ Help for ${0##*/} ~~~"
+    echo    "Explain what this script does and exit."
+    echo    "Describes the nix-shell parameter and provides template for scripts."
+    echo -e "\nRequired environment:"
+    echo    "  - ENV1 variable"
+    echo    "  - ENV2 variable"
     exit 1
 )
 
+requirements() (
+    if [[ -z ${ENV1+x} ]]; then
+        echo "ENV1 is not set. Aborting."
+        return 1
+    fi
+    if [[ -z ${ENV2+x} ]]; then
+        echo "ENV2 is not set. Aborting."
+        return 1
+    fi
+    return 0
+)
+
 self() (
-    if [[ $# -ge 1 ]] && [[ "$1" == "help" ]]; then
+    if ! requirements || ( [[ $# -ge 1 ]] && [[ "$1" == "help" ]] ); then
         help
     fi
+
     echo "nix-shell"
     echo "      -i: provides interpreter, here bash."
     echo "  --pure: only packeges provided by -p are available + environment is cleaned."
