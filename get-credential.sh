@@ -6,18 +6,21 @@
 
 set -Eeuo pipefail
 
+script_name="${0##*/}"
+
 help() (
-    echo -e "\n~~~ Help for ${0##*/} ~~~"
-    echo    "${0##*/} consists of 2 parts:"
+    echo -e "\n~~~ Help for $script_name ~~~"
+    echo    "$script_name consists of 2 parts:"
     echo    "1. Let user choose a secret by name."
     echo    "2. Get the secret and copy it to your clipboard."
 
     echo -e "\nExamples"
     echo    "- Choose and copy an aws secret to your clipboard:"
-    echo -e "    ${0##*/}\n"
+    echo -e "    $script_name\n"
 
     echo -e "Required environment:"
     echo    "  - AWS_PROFILE variable"
+
     exit 1
 )
 

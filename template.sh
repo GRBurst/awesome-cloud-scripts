@@ -6,14 +6,16 @@
 
 set -Eeuo pipefail
 
+script_name="${0##*/}"
+
 help() (
-    echo -e "\n~~~ Help for ${0##*/} ~~~"
+    echo -e "\n~~~ Help for $script_name ~~~"
     echo    "Explain what this script does and exit."
     echo    "Describes the nix-shell parameter and provides template for scripts."
 
     echo -e "\nExamples"
     echo    "- Print information about nix-shell parameters:"
-    echo -e "    ${0##*/}\n"
+    echo -e "    $script_name\n"
 
     echo    "Required environment:"
     echo    "  - ENV1 variable"
