@@ -2,7 +2,8 @@
 #! nix-shell -i bash
 #! nix-shell --pure
 #! nix-shell --keep AWS_PROFILE
-#! nix-shell -p awscli2 aws-vault awslogs fzf
+#! nix-shell -p awscli2 aws-vault
+#! nix-shell -p awslogs fzf
 
 set -Eeuo pipefail
 
@@ -22,8 +23,23 @@ help() (
     exit 1
 )
 
+# check_params() (
+#     cmd_params=($1)
+#     checks=($2)
+
+#     for check_param in "${checks[@]}"; do
+#         if [[ " ${cmd_params[*]} " =~ " ${check_param} " ]]; then
+#             return 0
+#         fi
+#     done
+
+#     return 1
+# )
+
 requirements() (
+    # local profile_params=("-p", "--profile")
     if [[ -z ${AWS_PROFILE+x} ]]; then
+    # if [[ -z ${AWS_PROFILE+x} ]] && [[ check_params "$@" "$profile_params" ]] || ; then
         echo "AWS_PROFILE is not set. Aborting."
         return 1
     fi
@@ -31,7 +47,7 @@ requirements() (
 )
 
 self() (
-    if ! requirements || ( [[ $# -ge 1 ]] && [[ "$1" == "help" ]] ); then
+    if ! (requirements $@) || ( [[ $# -ge 1 ]] && [[ "$1" == "help" ]] ); then
         help
     fi
 
