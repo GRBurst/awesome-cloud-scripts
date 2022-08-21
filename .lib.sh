@@ -15,10 +15,18 @@ _check_param_with_env() (
     local -n _with_env_check_args=$1
     local -n _with_env_check_lookup=$2
 
-    if [[ -n "${_with_env_check_lookup[value]}" ]]; then
+    if [[ ! -z "${_with_env_check_lookup[value]+unset}" ]] && [[ -n "${_with_env_check_lookup[value]}" ]]; then
         return 0
-    elif ( _check_param _with_env_check_args _with_env_check_lookup ); then
+    fi
+
+    if ( _check_param _with_env_check_args _with_env_check_lookup ); then
         return 0
+    else
+        if [[ -z "${_with_env_check_lookup[value]+unset}" ]]; then
+            echo "${_with_env_check_lookup[name]} parameter required but not provided."
+        else
+            echo "${_with_env_check_lookup[name]} environment variable or parameter required but not provided."
+        fi
     fi
     return 1
 )
@@ -36,6 +44,12 @@ check_requirements() (
     local -n _requirements_args=$1
     local -n _requirements_lookup=$2
 
+    unset test_assoc_array
+    if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
+        echo "associative arrays not supported!"
+        exit 1
+    fi
+
     declare -A _check_requirements_rows
     declare -A _check_requirements_cols
 
@@ -49,7 +63,9 @@ check_requirements() (
     for var in "${!_check_requirements_rows[@]}"; do
         declare -A _row
         for attr in "${!_check_requirements_cols[@]}"; do
-            _row+=([$attr]="${_requirements_lookup[$var,$attr]}")
+            if [[ ! -z "${_requirements_lookup[$var,$attr]+unset}" ]]; then
+                _row+=([$attr]="${_requirements_lookup[$var,$attr]}")
+            fi
         done
 
         _check_row _requirements_args _row || return 1
@@ -79,3 +95,15 @@ translate_args() (
 
     echo "$param_string"
 )
+
+assign() {
+    local -n assign_args=$1
+
+    if [[ -n ${3:-} ]]; then
+        assign_args[$2,value]="$3"
+        return 0
+    else
+        echo "Missing value for ${assign_args[$2,name]}"
+        return 1
+    fi
+}

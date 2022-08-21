@@ -16,8 +16,8 @@ source .lib.sh
 declare -A template_params=(
     [e1,arg]="--env1" [e1,value]="${ENV1:-}" [e1,short]="-e1" [e1,required]=true  [e1,name]="ENV1"
     [e2,arg]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2" [e2,required]=false [e2,name]="ENV2"
-    [p1,arg]="--par1" [p1,value]=""          [p1,short]="-p1" [p1,required]=true  [p1,name]="PAR1"
-    [p2,arg]="--par2" [p2,value]=""          [p2,short]="-p2" [p2,required]=false [p2,name]="PAR2"
+    [p1,arg]="--par1"                        [p1,short]="-p1" [p1,required]=true  [p1,name]="PAR1"
+    [p2,arg]="--par2"                        [p2,short]="-p2" [p2,required]=false [p2,name]="PAR2"
 )
 
 # Define your usage and help message here
@@ -61,19 +61,19 @@ configure() {
         case $1 in
         -e1 | --env1)
             shift
-            template_params[e1,value]="$1"
+            assign template_params e1 ${1:-} || usage
             ;;
         -e2 | --env2)
             shift
-            template_params[e2,value]="$1"
+            assign template_params e2 ${1:-} || usage
             ;;
         -p1 | --par1)
             shift
-            template_params[p1,value]="$1"
+            assign template_params p1 ${1:-} || usage
             ;;
         -p2 | --par2)
             shift
-            template_params[p2,value]="$1"
+            assign template_params p2 ${1:-} || usage
             ;;
         -h | --help)
             shift
