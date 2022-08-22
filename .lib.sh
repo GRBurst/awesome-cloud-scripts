@@ -15,14 +15,14 @@ _check_param_with_env() (
     local -n _with_env_check_args=$1
     local -n _with_env_check_lookup=$2
 
-    if [[ ! -z "${_with_env_check_lookup[value]+unset}" ]] && [[ -n "${_with_env_check_lookup[value]}" ]]; then
+    if [[ ! -z "${_with_env_check_lookup[value]:+unset}" ]] && [[ -n "${_with_env_check_lookup[value]}" ]]; then
         return 0
     fi
 
     if ( _check_param _with_env_check_args _with_env_check_lookup ); then
         return 0
     else
-        if [[ -z "${_with_env_check_lookup[value]+unset}" ]]; then
+        if [[ -z "${_with_env_check_lookup[value]:+unset}" ]]; then
             echo "${_with_env_check_lookup[name]} parameter required but not provided."
         else
             echo "${_with_env_check_lookup[name]} environment variable or parameter required but not provided."
@@ -63,7 +63,7 @@ check_requirements() (
     for var in "${!_check_requirements_rows[@]}"; do
         declare -A _row
         for attr in "${!_check_requirements_cols[@]}"; do
-            if [[ ! -z "${_requirements_lookup[$var,$attr]+unset}" ]]; then
+            if [[ ! -z "${_requirements_lookup[$var,$attr]:+unset}" ]]; then
                 _row+=([$attr]="${_requirements_lookup[$var,$attr]}")
             fi
         done
@@ -76,22 +76,31 @@ check_requirements() (
 )
 
 translate_args() (
-    local -n _translate_args=$1
+    if [[ -n "${1:+unset}" ]]; then
+        local -n _translate_args=$1
+        local -A _translate_rows
+        local param_string=""
 
-    local -A _translate_rows
-    local param_string=""
+        for var in "${!_translate_args[@]}"; do
+            IFS=','
+            read -ra _key_arr <<< "${var}"
+            _translate_rows[${_key_arr[0]}]=1
+        done
 
-    for var in "${!_translate_args[@]}"; do
-        IFS=','
-        read -ra _key_arr <<< "${var}"
-        _translate_rows[${_key_arr[0]}]=1
-    done
-
-    for var in "${!_translate_rows[@]}"; do
-    if [[ -n ${_translate_args[$var,value]:-} ]]; then
-        param_string+="${_translate_args[$var,arg]} ${_translate_args[$var,value]} "
+        for var in "${!_translate_rows[@]}"; do
+            if [[ -n "${_translate_args[$var,value]:+unset}" ]]; then
+                # value is set and not empty
+                param_string+="${_translate_args[$var,arg]} ${_translate_args[$var,value]} "
+            fi
+        done
     fi
-    done
+
+    if [[ -n "${2:+unset}" ]]; then
+        local -n _translate_switches=$2
+        for switch in "${_translate_switches[@]}"; do
+            param_string+="$switch"
+        done
+    fi
 
     echo "$param_string"
 )

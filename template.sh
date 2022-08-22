@@ -18,7 +18,10 @@ declare -A template_params=(
     [e2,arg]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2" [e2,required]=false [e2,name]="ENV2"
     [p1,arg]="--par1"                        [p1,short]="-p1" [p1,required]=true  [p1,name]="PAR1"
     [p2,arg]="--par2"                        [p2,short]="-p2" [p2,required]=false [p2,name]="PAR2"
+    [b,arg]="--bool"                         [b,short]="-b"   [b,required]=false  [b,name]="Bool Switch"
 )
+# We will add boolean switches like --bool to this
+declare -a template_bool_switches
 
 # Define your usage and help message here
 usage() (
@@ -75,6 +78,10 @@ configure() {
             shift
             assign template_params p2 ${1:-} || usage
             ;;
+        -b | --bool)
+            # this is a boolean switch without a value
+            template_bool_switches+=( "--bool" )
+            ;;
         -h | --help)
             shift
             usage
@@ -93,7 +100,7 @@ run() (
     echo "You can split up nix-shell parameters across lines."
     echo "The parameters will be merged"
 
-    str=$(translate_args template_params)
+    str=$(translate_args template_params template_bool_switches)
     hello -g "hello $str"
 )
 
