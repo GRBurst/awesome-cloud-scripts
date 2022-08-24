@@ -5,57 +5,135 @@
 #! nix-shell -p awscli2 aws-vault
 #! nix-shell -p awslogs fzf
 
+# https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail
 set -Eeuo pipefail
 
-script_name="${0##*/}"
+# cd to script location
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
-help() (
-    echo -e "\n~~~ Help for $script_name ~~~"
-    echo    "Choose and get aws logs of a chosen log group."
+source .lib.sh
 
-    echo -e "\nExamples"
-    echo    "- Choose and get aws logs:"
-    echo -e "    $script_name\n"
 
-    echo -e "Required environment:"
-    echo    "  - AWS_PROFILE variable"
+# Configure your parameters here. The provided 
+declare -A get_logs_options=(
+    [p,arg]="--profile" [p,value]="${AWS_PROFILE:-}" [p,short]="-p" [p,required]=true  [p,name]="aws profile"
+    [s,arg]="--start"                                [s,short]="-s" [s,required]=false [s,name]="start position"
+)
+# This will contain the resulting parameters of your command
+declare -A get_logs_params
+
+# Define your usage and help message here
+usage() (
+    local script_name="${0##*/}"
+    cat <<-USAGE
+
+Choose an aws log group and watch the logs.
+
+
+Usage and Examples
+-----
+
+- Choose aws log group and the logs:
+    $script_name
+
+
+Arguments and Environment
+---------
+
+Required environment:
+  - AWS_PROFILE variable or argument -p | --profile
+
+Optional arguments:
+  -s | --start
+
+USAGE
 
     exit 1
 )
 
-# check_params() (
-#     cmd_params=($1)
-#     checks=($2)
+# Process your parameters here
+configure() {
+    while [ "${1:-}" != "" ]; do
+        case $1 in
+        -p | --profile)
+            shift
+            # assign takes:
+            # 1. parameter array
+            # 2. first variable key (we used [p,*] before)
+            # 3. variable value
+            assign get_logs_options p ${1:-} || usage
+            ;;
+        -s | --start)
+            shift
+            assign get_logs_options s ${1:-} || usage
+            ;;
+        -h | --help)
+            shift
+            usage
+            ;;
+        esac
+        shift
+    done
+}
 
-#     for check_param in "${checks[@]}"; do
-#         if [[ " ${cmd_params[*]} " =~ " ${check_param} " ]]; then
-#             return 0
-#         fi
-#     done
+# Put your script logic here
+run() (
+    # Use the parameter string or access the get_logs_options yourself
+    # local paramstr=${get_logs_options[paramstr]:-}
+    local groups_paramstr="${get_logs_options[p,str]:-}"
 
-#     return 1
-# )
+    # local -a paramstr=(${get_logs_options[paramstr]:-})
+    # read -a paramstr <<< ${get_logs_options[paramstr]}
+    local -a paramstr=("$(echo "${get_logs_options[paramstr]}" | sed -e 's/^[[:space:]]*//')")
+    read -a paramstr <<< $(echo "${get_logs_options[paramstr]}" | sed -e 's/^[[:space:]]*//')
 
-requirements() (
-    # local profile_params=("-p", "--profile")
-    if [[ -z ${AWS_PROFILE+x} ]]; then
-    # if [[ -z ${AWS_PROFILE+x} ]] && [[ check_params "$@" "$profile_params" ]] || ; then
-        echo "AWS_PROFILE is not set. Aborting."
-        return 1
-    fi
-    return 0
+    # awslogs groups "${get_logs_options[paramstr]:-}"
+    # awslogs groups "$groups_paramstr"
+    echo "elements ${#paramstr[@]}"
+    for e in "${paramstr[@]}"; do
+        echo "e = $e"
+    done
+
+    # (awslogs groups "${paramstr[@]}")
+
+    # echo "awslogs groups $paramstr"
+    # awslogs groups "${paramstr[@]}"
+
+    # local group=$(eval "awslogs groups $groups_paramstr" | fzf)
+    # if [ -n "$group" ]; then
+    #     eval "awslogs get --watch $group --no-group --no-stream $paramstr"
+    # fi
+
+    # local t="$(echo $groups_paramstr)"
+    # echo $1
+    # echo $paramstr
+    # awslogs groups $1
+    # awslogs get ALL --no-group --no-stream $1
+    # local group=$(awslogs groups $groups_paramstr | fzf)
+    # if [ -n "$group" ]; then
+    #     awslogs get --watch $group --no-group --no-stream $paramstr
+    # fi
 )
 
+
+# This is the base frame and it shouldn't be necessary to touch it
 self() (
-    if ! (requirements $@) || ( [[ $# -ge 1 ]] && [[ "$1" == "help" ]] ); then
-        help
+    declare -a args=$@
+    if ! (check_requirements args get_logs_options) || [[ "${1:-}" == "help" ]]; then
+        usage
+    else
+        if (($# > 0)); then
+            configure $args
+        fi
+
+        translate_args get_logs_options
+        # echo "now ${get_logs_options[paramstr]}"
+
+        # local p=$(echo "${get_logs_options[paramstr]}")
+        # run "$p"
+        run
     fi
 
-    group=$(awslogs groups | fzf)
-    if [ -n "$group" ]
-    then
-        awslogs get --watch $group --no-group --no-stream
-    fi
 )
 
 self $@
