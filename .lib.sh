@@ -6,6 +6,54 @@ declare -a _lib_params_order
 _print_error() (
     local _print_error_msg="$1"
     echo -e "\e[31m[ERROR] ${_print_error_msg}\e[0m"
+    echo "run --help for usage information."
+)
+
+_print_var_usage() (
+    printf '\n  %s | %s \t# %s %s' "$1" "$2" "$3" "$4"
+)
+
+_generate_usage() (
+    local -n _generate_usage_options="$1"
+
+    local -A _generate_usage_rows
+    local -A _generate_usage_cols
+    _get_keys_matrix _generate_usage_options _generate_usage_rows _generate_usage_cols
+
+    local _generate_usage_required
+    local _generate_usage_optional
+    local _generate_usage_required_env
+    local _generate_usage_optional_env
+
+    for var in "${!_generate_usage_rows[@]}"; do
+        if [[ -n "${_generate_usage_options[$var,value]+unset}" ]]; then
+            if [[ "${_generate_usage_options[$var,required]}" == "true" ]]; then
+                _generate_usage_required_env+="$(_print_var_usage "${_generate_usage_options[$var,short]}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "variable or argument")"
+            else
+                _generate_usage_optional_env+="$(_print_var_usage "${_generate_usage_options[$var,short]}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "variable or argument")"
+            fi
+        else
+            if [[ "${_generate_usage_options[$var,required]}" == "true" ]]; then
+                _generate_usage_required+="$(_print_var_usage "${_generate_usage_options[$var,short]}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "argument")"
+            else
+                _generate_usage_optional+="$(_print_var_usage "${_generate_usage_options[$var,short]}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "argument")"
+            fi
+        fi
+    done
+
+    cat <<-USAGE
+Arguments and Environment
+---------
+
+Required environment: ${_generate_usage_required_env}
+
+Optional environment: ${_generate_usage_optional_env}
+
+Required arguments: ${_generate_usage_required}
+
+Optional arguments: ${_generate_usage_optional}
+
+USAGE
 )
 
 _check_param() (
@@ -52,6 +100,7 @@ _get_keys_matrix() {
     local -n _get_keys_matrix_assoc="$1"
     local -n _get_keys_matrix_rows="$2"
     local -n _get_keys_matrix_cols="$3"
+    # We create two arrays for the rows and column keys that doesn't contain duplicates
     for var in "${!_get_keys_matrix_assoc[@]}"; do
         IFS=',' read -ra _key_arr <<< "${var}"
         _get_keys_matrix_rows["${_key_arr[0]}"]=1
@@ -73,9 +122,11 @@ check_requirements() (
     declare -A _check_requirements_cols
     _get_keys_matrix _requirements_lookup _check_requirements_rows _check_requirements_cols
 
+    # Check all options row by row (so for each variable)
     for var in "${!_check_requirements_rows[@]}"; do
         declare -A _row
         for attr in "${!_check_requirements_cols[@]}"; do
+            # If an attribute is set in the options, we add it to our row in order to check
             if [[ ! -z "${_requirements_lookup[$var,$attr]:+unset}" ]]; then
                 _row+=(["$attr"]="${_requirements_lookup[$var,$attr]}")
             fi
@@ -132,9 +183,12 @@ configure() {
     declare -A _configure_options_cols
     _get_keys_matrix _configure_options _configure_options_rows _configure_options_cols
 
+    # Go through all parameter option
     for var in "${!_configure_options_rows[@]}"; do
         for i in "${!_configure_args[@]}"; do
+            # Compare if short or long parameter is provided
             if [[ "${_configure_args[$i]}" == "${_configure_options[$var,arg]}" ]] || [[ "${_configure_args[$i]}" == "${_configure_options[$var,short]}" ]]; then
+                # If not of type boolean / switch, we read the next argument (which should be the value)
                 if [[ "${_configure_options[$var,tpe]:-}" != "bool" ]]; then
                     _assign _configure_options "$var" "${_configure_args[$((i+1))]:-}"
                 else

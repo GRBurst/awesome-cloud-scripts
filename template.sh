@@ -13,7 +13,9 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 source .lib.sh
 
 
-# Configure your parameters here. The provided 
+# Configure your parameters here.
+# If it can be set by an env, you have to define the value (see [e1,value] and [e2,value]) and if it
+# can only be configured by parameters, you must not define it (e.g. [p1,value] and [p2,value]).
 declare -A template_options=(
     [e1,arg]="--env1" [e1,value]="${ENV1:-}" [e1,short]="-e1" [e1,required]=true  [e1,name]="ENV1"
     [e2,arg]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2" [e2,required]=false [e2,name]="ENV2"
@@ -40,21 +42,8 @@ Usage and Examples
     $script_name
 
 
-Arguments and Environment
----------
+$(_generate_usage template_options)
 
-Required arguments:
-  -p1 | --par1
-
-Optional arguments:
-  -p2 | --par2
-  -b | --bool
-
-Required environment:
-  - ENV1 variable or argument -e1 | --env1
-
-Optional environment:
-  - ENV2 variable or argument -e2 | --env2
 
 USAGE
 
