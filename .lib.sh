@@ -137,6 +137,8 @@ configure() {
             if [[ "${_configure_args[$i]}" == "${_configure_options[$var,arg]}" ]] || [[ "${_configure_args[$i]}" == "${_configure_options[$var,short]}" ]]; then
                 if [[ "${_configure_options[$var,tpe]:-}" != "bool" ]]; then
                     _assign _configure_options "$var" "${_configure_args[$((i+1))]:-}"
+                else
+                    _assign _configure_options "$var" "true"
                 fi
             fi
         done
@@ -158,10 +160,10 @@ translate_args() {
             if [[ -n "${_translate_args[$var,value]:+unset}" ]]; then
                 # value is set and not empty
                 local _translate_args_param_arg_key="$var,arg"
+                local _translate_args_param_val_key="$var,value"
                 _lib_params_assoc+=( ["$_translate_args_param_arg_key"]="${_translate_args[$_translate_args_param_arg_key]}" )
                 _lib_params_order+=( "$_translate_args_param_arg_key" )
                 if [[ "${_translate_args[$var,tpe]:-}" != "bool" ]]; then
-                    local _translate_args_param_val_key="$var,value"
                     _lib_params_assoc+=( ["$_translate_args_param_val_key"]="${_translate_args[$_translate_args_param_val_key]}" )
                     _lib_params_order+=( "$_translate_args_param_val_key" )
                 fi
