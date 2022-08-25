@@ -76,7 +76,7 @@ run() (
 # This is the base frame and it shouldn't be necessary to touch it
 self() (
     declare -a args=( "$@" )
-    if ! (check_requirements args template_options) || [[ "${1:-}" == "help" ]]; then
+    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]] || ! (check_requirements args template_options); then
         usage
     else
 
