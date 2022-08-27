@@ -56,11 +56,23 @@ Optional arguments: ${_generate_usage_optional}
 USAGE
 )
 
+_get_keys_matrix() {
+    local -n _get_keys_matrix_assoc="$1"
+    local -n _get_keys_matrix_rows="$2"
+    local -n _get_keys_matrix_cols="$3"
+    # We create two arrays for the rows and column keys that doesn't contain duplicates
+    for var in "${!_get_keys_matrix_assoc[@]}"; do
+        IFS=',' read -ra _key_arr <<< "${var}"
+        _get_keys_matrix_rows["${_key_arr[0]}"]=1
+        _get_keys_matrix_cols["${_key_arr[1]}"]=1
+    done
+}
+
 _check_param() (
     local -n _check_param_args="$1"
-    local -n _check_param_lookup="$2"
+    local -n _check_param_options="$2"
 
-    if [[ " ${_check_param_args[*]} " =~ " ${_check_param_lookup[short]} " ]] || [[ " ${_check_param_args[*]} " =~ " ${_check_param_lookup[arg]} " ]]; then
+    if [[ " ${_check_param_args[*]} " =~ " ${_check_param_options[short]} " ]] || [[ " ${_check_param_args[*]} " =~ " ${_check_param_options[arg]} " ]]; then
         return 0
     fi
 
@@ -68,20 +80,24 @@ _check_param() (
 )
 
 _check_param_with_env() (
-    local -n _with_env_check_args="$1"
-    local -n _with_env_check_lookup="$2"
+    local -n _check_param_with_env_args="$1"
+    local -n _check_param_with_env_options="$2"
 
-    if [[ ! -z "${_with_env_check_lookup[value]:+unset}" ]] && [[ -n "${_with_env_check_lookup[value]}" ]]; then
+    if [[ ! -z "${_check_param_with_env_options[value]:+unset}" ]] && [[ -n "${_check_param_with_env_options[value]}" ]]; then
         return 0
     fi
 
-    if ( _check_param _with_env_check_args _with_env_check_lookup ); then
+    if ( _check_param _check_param_with_env_args _check_param_with_env_options ); then
+        # parameter is provided
+        # TODO: check if value is there as well (only for non-bool)
         return 0
     else
-        if [[ -z "${_with_env_check_lookup[value]:+unset}" ]]; then
-            _print_error "${_with_env_check_lookup[name]} parameter required but not provided."
+        if [[ -z "${_check_param_with_env_options[value]:+unset}" ]]; then
+            # value can only be provided as parameter (value not defined), but the parameter is not provided
+            _print_error "${_check_param_with_env_options[name]} parameter required but not provided."
         else
-            _print_error "${_with_env_check_lookup[name]} environment variable or parameter required but not provided."
+            # value can be provided as environment variable or parameter (value is defined but empty), but the parameter is not provided in either way
+            _print_error "${_check_param_with_env_options[name]} environment variable or parameter required but not provided."
         fi
     fi
     return 1
@@ -96,44 +112,68 @@ _check_row() (
     fi
 )
 
-_get_keys_matrix() {
-    local -n _get_keys_matrix_assoc="$1"
-    local -n _get_keys_matrix_rows="$2"
-    local -n _get_keys_matrix_cols="$3"
-    # We create two arrays for the rows and column keys that doesn't contain duplicates
-    for var in "${!_get_keys_matrix_assoc[@]}"; do
-        IFS=',' read -ra _key_arr <<< "${var}"
-        _get_keys_matrix_rows["${_key_arr[0]}"]=1
-        _get_keys_matrix_cols["${_key_arr[1]}"]=1
-    done
-}
 
 check_requirements() (
-    local -n _requirements_args="$1"
-    local -n _requirements_lookup="$2"
+    local -n _check_requirements_args="$1"
+    local -n _check_requirements_options="$2"
 
     unset test_assoc_array
     if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
         _print_error "associative arrays not supported!"
-        exit 1
     fi
 
     declare -A _check_requirements_rows
     declare -A _check_requirements_cols
-    _get_keys_matrix _requirements_lookup _check_requirements_rows _check_requirements_cols
+    _get_keys_matrix _check_requirements_options _check_requirements_rows _check_requirements_cols
 
     # Check all options row by row (so for each variable)
     for var in "${!_check_requirements_rows[@]}"; do
         declare -A _row
         for attr in "${!_check_requirements_cols[@]}"; do
             # If an attribute is set in the options, we add it to our row in order to check
-            if [[ ! -z "${_requirements_lookup[$var,$attr]:+unset}" ]]; then
-                _row+=(["$attr"]="${_requirements_lookup[$var,$attr]}")
+            if [[ ! -z "${_check_requirements_options[$var,$attr]:+unset}" ]]; then
+                _row+=(["$attr"]="${_check_requirements_options[$var,$attr]}")
             fi
         done
 
-        _check_row _requirements_args _row || return 1
+        _check_row _check_requirements_args _row
         unset _row
+    done
+
+    local i=0
+    while (( i < ${#_check_requirements_args[@]} )); do # args provided by user
+        # We check all vars wether they are required and check them
+        for var in "${!_check_requirements_rows[@]}"; do # all variables from options
+            if [[ "${_check_requirements_options[$var,required]}" == "true" ]] || ((0 < 1)); then 
+
+                # Found arg in options
+                if [[ "${_check_requirements_args[$i]}" == "${_check_requirements_options[$var,arg]}" ]] || [[ "${_check_requirements_args[$i]}" == "${_check_requirements_options[$var,short]}" ]]; then
+
+                    local j=1
+                    while (( j <= ${_check_requirements_options[$var,pos]:-1} )) \
+                        && ( [[ -n "${_check_requirements_options[$var,tpe]:+unset}" ]] \
+                            && [[ "${_check_requirements_options[$var,tpe]}" != "bool" ]] \
+                            || [[ -z "${_check_requirements_options[$var,tpe]:+unset}" ]]); do # args provided by user
+
+                        if ! (for var in "${!_check_requirements_rows[@]}"; do # all variables from options
+
+                            # if [[ " ${_check_param_args[*]} " =~ " ${_check_requirements_options[$var,arg]} " ]] || [[ " ${_check_param_args[*]} " =~ " ${_check_requirements_options[$var,short]} " ]]; then
+
+                            if [[ "${_check_requirements_args[$((i+j))]:+unset}" ]] \
+                                && ([[ "${_check_requirements_args[$((i+j))]}" == "${_check_requirements_options[$var,arg]}" ]] \
+                                || [[ "${_check_requirements_args[$((i+j))]}" == "${_check_requirements_options[$var,short]}" ]]); then
+                                return 1
+                            fi
+                        done); then
+                            _print_error "Aborting ${_check_requirements_args[$i]} = ${_check_requirements_args[$((i+j))]}"
+                            exit 1
+                        fi
+                        let j++
+                    done
+                fi
+            fi
+        done
+        let i++
     done
 
     return 0
@@ -141,13 +181,13 @@ check_requirements() (
 
 
 _assign() {
-    local -n assign_args="$1"
+    local -n _assign_args="$1"
 
     if [[ -n "${3:-}" ]]; then
-        assign_args["$2,value"]="$3"
+        _assign_args["$2,value"]="$3"
         return 0
     else
-        _print_error "Missing value for ${assign_args[$2,name]}"
+        _print_error "Missing value for ${_assign_args[$2,name]}"
         return 1
     fi
 }
