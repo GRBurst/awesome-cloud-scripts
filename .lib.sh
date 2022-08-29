@@ -1,5 +1,11 @@
 #! /usr/bin/env bash
 
+unset test_assoc_array
+if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
+    _print_error "associative arrays not supported!"
+    exit 1
+fi
+
 declare -A _lib_params_assoc
 declare -a _lib_params_order
 
@@ -117,10 +123,6 @@ check_requirements() (
     local -n _check_requirements_args="$1"
     local -n _check_requirements_options="$2"
 
-    unset test_assoc_array
-    if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
-        _print_error "associative arrays not supported!"
-    fi
 
     declare -A _check_requirements_rows
     declare -A _check_requirements_cols
