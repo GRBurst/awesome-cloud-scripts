@@ -13,9 +13,20 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 source .lib.sh
 
 
-# Configure your parameters here.
-# If it can be set by an env, you have to define the value (see [e1,value] and [e2,value]) and if it
-# can only be configured by parameters, you must not define it (e.g. [p1,value] and [p2,value]).
+# Configure your variables and parameters here.
+# We destinguish between variables and attributes and interprete the key of as 2-dim arrays.
+#   -> In our case: e1, e2, p1, p2 and b are our variables
+#   -> In our case: arg, value, short, required, name, type and pos are our attributes
+# The scritp assumes the 2-dim array keys to be separated by a comme (,).
+# Variables are checked by searching all arguments for the representing arg or its short version.
+#   -> In our case: To check e1, we search for --env1 or -e1, because we defined the 
+#                   arg with [e1,arg]="--env1" and its short version with [e1,short]="-e1"
+# Requriered parameters are checked and a usful error is provided if they are omitted.
+# If your value can be provided by an environment variable, you have to define the environment value.
+#   -> In our case: [e1,value]="{ENV1:-}" and [e2,value]="${ENV2:-}"
+# If you don't want it to be set by an environment variable (so it can only be configured by parameters),
+# you must not (!) define it for the build in evaluation to work.
+#   -> In our case: [p1,value], [p2,value] and [b,value] are not defined in the array
 declare -A template_options=(
     [e1,arg]="--env1" [e1,value]="${ENV1:-}" [e1,short]="-e1" [e1,required]=true  [e1,name]="ENV1"
     [e2,arg]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2" [e2,required]=false [e2,name]="ENV2"
