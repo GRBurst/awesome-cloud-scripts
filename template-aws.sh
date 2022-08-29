@@ -10,7 +10,7 @@ set -Eeuo pipefail
 # cd to script location
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-source .lib.sh
+source lib.sh
 
 
 # Configure your parameters here. The provided 

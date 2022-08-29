@@ -6,6 +6,9 @@ if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
     exit 1
 fi
 
+trap 'cleanup $? $LINENO' ERR
+cleanup() ( echo "Error: (${1:-}) occurred on line ${2:-}" )
+
 declare -A _lib_params_assoc
 declare -a _lib_params_order
 

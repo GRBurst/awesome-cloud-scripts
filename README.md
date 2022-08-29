@@ -1,12 +1,18 @@
-﻿# Nix Cloud Scripts
+﻿# Script-Cook
 
-Nix Cloud Scripts serves as a central point to distribute simple scripts and tools that simplifies work with cloud environments.
-Scripts are written to favor the use of `nix-shell`, since they provide the complete environment to run the script.
-Right now, the repository structure is flat. This may change in the future such that we categorize scripts to their domain, e.g. `aws` or `terraform`.
+Single file library (pure bash) that generates all the boilerplate for your bash scripts.
+By providing necessary information using an associative array, you get the following:
 
-You can find installation instructions for nix on the [official website](https://nixos.org/download.html#nix-install-linux).
+- Check if all required arguments are provided
+- Check if the arguments are followed by the correct number of values
+- Readable array to get values for all or single parameters
+- Partially `usage` message which you can show in your help
 
-## Run a script
+It should cover all common use cases, but some corner cases may not be covered, yet.
+
+Feel free to open an issue if you find yourself in need of a missing feature, if you have an idea to simplify its usage or if you have an idea to improve the lib in gereral.
+
+## Run the template script
 
 If you have `nix` and `nix-shell` installed on your system, you can run the scripts directly using:
 
@@ -19,7 +25,3 @@ If you don’t have `nix-shell` on your system, you have to take care of the nee
 ```
 bash ./template.sh
 ```
-
-## Adding a script
-
-Please use the templates `template.sh` and `template-aws.sh`. It contains a description as well.
