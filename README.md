@@ -2,9 +2,9 @@
 
 Nix Cloud Scripts serves as a central point to distribute simple scripts and tools that simplifies work with cloud environments.
 Scripts are written to favor the use of `nix-shell`, since they provide the complete environment to run the script.
-Right now, the repository structure is flat. This may change in the future such that we categorize scripts to their domain, e.g. `aws` or `nocode`.
+Right now, the repository structure is flat. This may change in the future such that we categorize scripts to their domain, e.g. `aws` or `terraform`.
 
-You can find installation instructions on the [official website](https://nixos.org/download.html#nix-install-linux).
+You can find installation instructions for nix on the [official website](https://nixos.org/download.html#nix-install-linux).
 
 ## Run a script
 
