@@ -91,7 +91,7 @@ self() (
         usage
     elif (check_requirements template_options args); then
 
-        process_args args template_options template_params
+        process_args template_options args template_params || _print_debug "Couldn't process args, terminated with $?"
 
         run
     else
