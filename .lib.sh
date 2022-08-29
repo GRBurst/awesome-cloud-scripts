@@ -151,44 +151,114 @@ check_requirements() {
 
     _print_debug_success "All required parameters are provided. Continuing with sanity check."
 
+    # Iterate all user provided arguments one by one and search for the corresponding option.
+    # While checking, we test if:
+    # 1. A required parameter is present
+    # 2. The parameter is followed by n values
+    #   2.1 Values are arguments that are no parameter for the script itself
+    #   2.2 If there is a value that equals a parameter, we have to check
+    #       2.2.1 whether the parameter is already given or
+    #       2.2.2 the parameter is present in a later part of the parameter array
+    #   2.3 If the parameter is of type boolean, we don't have to check for further value arguments.
+    # 3. If the parameter is not required, we still have to check its sanity by precessing all steps from 2.
+
+    local total_args_length="${#_check_requirements_args[@]}"
     local i=0
-    while (( i < ${#_check_requirements_args[@]} )); do # args provided by user
-        # We check all vars wether they are required and check them
-        for var in "${!_check_requirements_rows[@]}"; do # all variables from options
-            if [[ "${_check_requirements_options[$var,required]}" == "true" ]] || ((0 < 1)); then 
+    while (( i < total_args_length )); do # Iterate all user provided args
+        local user_argument="${_check_requirements_args[$i]}"
+        _print_debug "checking user_argument[$i] = $user_argument"
+        for var in "${!_check_requirements_rows[@]}"; do # Search the corresponding variable from options
+            _print_debug "  |Starting options loop with var = $var"
+            local argument_option="${_check_requirements_options[$var,arg]}"
+            local argument_option_short="${_check_requirements_options[$var,short]}"
 
-                # Found arg in options
-                if [[ "${_check_requirements_args[$i]}" == "${_check_requirements_options[$var,arg]}" ]] || [[ "${_check_requirements_args[$i]}" == "${_check_requirements_options[$var,short]}" ]]; then
-
-                    local j=1
-                    while (( j <= ${_check_requirements_options[$var,pos]:-1} )) \
-                        && ( [[ -n "${_check_requirements_options[$var,tpe]:+unset}" ]] \
-                            && [[ "${_check_requirements_options[$var,tpe]}" != "bool" ]] \
-                            || [[ -z "${_check_requirements_options[$var,tpe]:+unset}" ]]); do # args provided by user
-
-                        if ! (for var in "${!_check_requirements_rows[@]}"; do # all variables from options
-
-                            # if [[ " ${_check_param_args[*]} " =~ " ${_check_requirements_options[$var,arg]} " ]] || [[ " ${_check_param_args[*]} " =~ " ${_check_requirements_options[$var,short]} " ]]; then
-
-                            if [[ "${_check_requirements_args[$((i+j))]:+unset}" ]] \
-                                && ([[ "${_check_requirements_args[$((i+j))]}" == "${_check_requirements_options[$var,arg]}" ]] \
-                                || [[ "${_check_requirements_args[$((i+j))]}" == "${_check_requirements_options[$var,short]}" ]]); then
-                                return 1
-                            fi
-                        done); then
-                            _print_error "Aborting ${_check_requirements_args[$i]} = ${_check_requirements_args[$((i+j))]}"
-                            exit 1
-                        fi
-                        let j++
-                    done
-                fi
+            # Current argument is not found in options, continue search for corresponding parameter
+            if [[ "$user_argument" != "$argument_option" ]] \
+                && [[ "$user_argument" != "$argument_option_short" ]]; then
+                _print_debug "  |$user_argument != $argument_option && $user_argument != $argument_option_short"
+                _print_debug "  |Continuing to search real parameter."
+                continue
             fi
+            _print_debug "  |$user_argument is a valid parameter"
+
+            # If the variable is has a type set and the type is boolean (tpe == bool),
+            # we don't have to check the argument and continue
+            if [[ -n "${_check_requirements_options[$var,tpe]:+unset}" ]] \
+                && [[ "${_check_requirements_options[$var,tpe]:-}" == "bool" ]]; then
+                _check_requirements_options=( ["$var",_checked]="true" )
+                _print_debug "  |$user_argument is boolean, skipping further checks"
+                let i++
+                continue 2 # Continue ourer while loop
+            fi
+
+            # Now we check if the parameter got n arguments (pos), these are not a parameter itself,
+            # unless the are provided again as a parameter after n arguments
+            # Default number of positions is n=1.
+            local user_arg_pos=${_check_requirements_options[$var,pos]:-1}
+            local j=$((i+1))
+            # Separate check if the last argument is a parameter but no value is provided
+            if (( j >= total_args_length )); then
+                _print_error "Aborting. Not enough values provided for parameter ${_check_requirements_options[$var,name]}."
+                return 1
+            fi
+
+            # Search all following arguments for valid values
+            while (( j < total_args_length )); do
+                if [[ -z "${_check_requirements_args[$j]:+unset}" ]]; then
+                    _print_error "Aborting. Not enough values provided for parameter ${_check_requirements_options[$var,name]}."
+                    return 1
+                fi
+                local next_user_argument="${_check_requirements_args[$j]}"
+                _print_debug "    |next_user_argument[$j] = $next_user_argument"
+
+                # Check if the next argument is not a
+                for next_var in "${!_check_requirements_rows[@]}"; do # all variables from options
+                    local next_argument_option="${_check_requirements_options[$next_var,arg]}"
+                    local next_argument_option_short="${_check_requirements_options[$next_var,short]}"
+
+                    # If the next argument does not equal a parameter, we are save to continue
+                    if [[ "$next_user_argument" != "$next_argument_option" ]] \
+                        && [[ "$next_user_argument" != "$next_argument_option_short" ]]; then
+                        _print_debug "      |$next_user_argument != parameter $next_argument_option and $next_argument_option_short, skipping further checks"
+                        continue
+                    fi
+
+                    # If the argument equals a parameter, but that parameter is alreay checked correctly,
+                    # e.g. it was provided before and checked, we can continue
+                    if [[ "${_check_requirements_options[$next_var,_checked]:-}" == "true" ]]; then
+                        _print_debug "      |$next_var[$j] is checked already, therefore this can be a valid value"
+                        continue
+                    fi
+
+                    # Now, only if the parameter is provided again in the arguments, it can still be a valid
+                    # argument list and hence a valid command
+                    local -i k=$((i+user_arg_pos+1))
+                    while (( k < ${total_args_length} )); do # args provided by user
+                        if [[ $next_user_argument == "${_check_requirements_args[$k]}" ]]; then
+                            _print_debug "        |$next_user_argument[$j] is provided again later in the _check_requirements_args[$k]"
+                            continue 2
+                        fi
+                        let k++
+                    done
+
+                    _print_error "Aborting. Value of $user_argument is $next_user_argument but also a parameter. However, we couldn't find another $next_user_argument, so it seems like not enough argument are provided. The parameter $user_argument needs $user_arg_pos parameter(s)."
+                                return 1
+
+                done
+
+                        let j++
+                _print_debug "    |next value"
+
+                    done
+
         done
+
         let i++
+        _print_debug "|next parameter"
     done
 
     return 0
-)
+}
 
 
 _assign() {
@@ -279,11 +349,11 @@ translate_args() {
 
 
 process_args() {
-    local -n _process_args_args="$1"
-    local -n _process_args_options="$2"
+    local -n _process_args_options="$1"
+    local -n _process_args_args="$2"
     local -n _process_args_params="$3"
 
-    configure _process_args_args _process_args_options
-    translate_args _process_args_options
-    get_args _process_args_params
+    configure _process_args_args _process_args_options || _print_debug "configure terminated with $?"
+    translate_args _process_args_options || _print_debug "translate terminated with $?"
+    get_args _process_args_params || _print_debug "get_args terminated with $?"
 }
