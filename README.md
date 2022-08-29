@@ -25,3 +25,7 @@ If you don’t have `nix-shell` on your system, you have to take care of the nee
 ```
 bash ./template.sh
 ```
+
+# Related
+
+This project was created in companion with [nix-cloud-scripts](https://github.com/GRBurst/nix-cloud-scripts), a collection of scripts to ease your work with cloud environments.
