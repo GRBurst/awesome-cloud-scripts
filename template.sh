@@ -60,8 +60,6 @@ USAGE
 
 # Put your script logic here
 run() (
-    # Use all the parameter with the defined array template_params
-
     echo "nix-shell"
     echo "      -i: provides interpreter, here bash."
     echo "  --pure: only packeges provided by -p are available + environment is cleaned."
@@ -70,14 +68,15 @@ run() (
     echo "You can split up nix-shell parameters across lines."
     echo "The parameters will be merged"
 
-    local paramstr="${template_params[@]}"
-    hello -g "hello $paramstr"
+    # Access a dedicated variable by using get_args yourself
+    local -a p1_params
+    get_args p1_params "p1"
+    hello -g "hello ${p1_params[*]}"
 
-    # Or access a dedicated variable by using get_args yourself
-    # local -a p1_params
-    # get_args p1_params "p1"
-    # local paramstr="${p1_params[@]}"
-    # hello -g "hello $paramstr"
+    # Or Use all the parameter with the defined array template_params
+    hello -g "hello ${template_params[*]}"
+
+
 )
 
 
