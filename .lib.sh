@@ -10,9 +10,21 @@ declare -A _lib_params_assoc
 declare -a _lib_params_order
 
 _print_error() (
-    local _print_error_msg="$1"
+    local _print_error_msg="$@"
     echo -e "\e[31m[ERROR] ${_print_error_msg}\e[0m"
-    echo "run --help for usage information."
+    # exit 1
+)
+_print_debug() (
+    if [[ "${DEBUG:-}" == "true" ]]; then
+        local _print_debug_msg="$@"
+        echo -e "\e[36m[DEBUG] ${_print_debug_msg}\e[0m"
+    fi
+)
+_print_debug_success() (
+    if [[ "${DEBUG:-}" == "true" ]]; then
+        local _print_debug_msg="$@"
+        echo -e "\e[32m[DEBUG] ${_print_debug_msg}\e[0m"
+    fi
 )
 
 _print_var_usage() (
