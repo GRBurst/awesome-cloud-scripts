@@ -44,13 +44,11 @@ USAGE
 # Put your script logic here
 run() (
     # Use all the parameter with the defined array template_aws_params
-    # echo "aws sts get-caller-identity ${template_aws_params[@]}"
     # aws sts get-caller-identity "${template_aws_params[@]}"
 
     # Or access a dedicated variable by using get_args yourself
     local -a p_params
     get_args p_params "p"
-    # echo "aws sts get-caller-identity ${p_params[@]}"
     aws sts get-caller-identity "${p_params[@]}"
 )
 
