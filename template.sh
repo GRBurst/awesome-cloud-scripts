@@ -87,13 +87,15 @@ run() (
 # This is the base frame and it shouldn't be necessary to touch it
 self() (
     declare -a args=( "$@" )
-    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]] || ! (check_requirements args template_options); then
+    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    else
+    elif (check_requirements template_options args); then
 
         process_args args template_options template_params
 
         run
+    else
+        _print_debug "Requirements not met"
     fi
 
 )
