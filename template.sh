@@ -55,10 +55,7 @@ Usage and Examples
 
 $(_generate_usage template_options)
 
-
 USAGE
-
-    exit 1
 )
 
 # Put your script logic here

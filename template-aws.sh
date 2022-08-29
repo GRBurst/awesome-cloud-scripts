@@ -1,11 +1,8 @@
 #! /usr/bin/env nix-shell
 #! nix-shell -i bash
 #! nix-shell --pure
-#! nix-shell --keep AWS_PROFILE
+#! nix-shell --keep AWS_PROFILE --keep DEBUG
 #! nix-shell -p awscli2 aws-vault
-
-# nix-shell -p (import ./deps.nix)
-# nix-shell ./deps.nix
 
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail
 set -Eeuo pipefail
@@ -28,8 +25,8 @@ usage() (
     local script_name="${0##*/}"
     cat <<-USAGE
 
-Template for AWS scripts."
-Please have a look at template.sh as well."
+Template for AWS scripts.
+Please have a look at template.sh as well.
 
 
 Usage and Examples
@@ -39,15 +36,9 @@ Usage and Examples
     $script_name
 
 
-Arguments and Environment
----------
-
-Required environment:
-  - AWS_PROFILE variable or argument -p | --profile
+$(_generate_usage template_aws_options)
 
 USAGE
-
-    exit 1
 )
 
 # Put your script logic here
@@ -67,14 +58,15 @@ run() (
 # This is the base frame and it shouldn't be necessary to touch it
 self() (
     declare -a args=( "$@" )
-    if ! (check_requirements args template_aws_options) || [[ "${1:-}" == "help" ]]; then
+    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    else
+    elif (check_requirements template_aws_options args); then
 
-        process_args args template_aws_options template_aws_params
+        process_args template_aws_options args template_aws_params || _print_debug "Couldn't process args, terminated with $?"
 
         run
-
+    else
+        _print_debug "Requirements not met"
     fi
 
 )
