@@ -212,8 +212,6 @@ check_requirements() {
             continue
         fi
 
-        local user_arg_pos=${_check_requirements_options[$var,pos]:-1}
-
         _print_debug "  |Starting options loop with var = $var, ${_check_requirements_options[$var,arg]:-}"
         local argument_option="${_check_requirements_options[$var,arg]}"
         local argument_option_short="${_check_requirements_options[$var,short]}"
@@ -231,13 +229,15 @@ check_requirements() {
         # Now we check if the parameter got n arguments (pos), these are not a parameter itself,
         # unless the are provided again as a parameter after n arguments
         # Default number of positions is n=1.
-        local j=$((i+1))
+        local user_arg_pos=${_check_requirements_options[$var,pos]:-1}
+
         # Separate check if the last argument is a parameter but no value is provided
-        if (( j >= total_args_length )); then
+        if (( i+user_arg_pos  >= total_args_length )); then
             _print_error "Aborting. Not enough values provided for last parameter ${_check_requirements_options[$var,name]}."
             return 1
         fi
 
+        local j=$((i+1))
         # Search all following arguments for valid values
         while (( j < total_args_length )); do
             if [[ -z "${_check_requirements_args[$j]:+unset}" ]]; then
