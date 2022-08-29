@@ -87,10 +87,13 @@ _get_keys_matrix() {
 }
 
 _check_param() (
-    local -n _check_param_args="$1"
-    local -n _check_param_options="$2"
+    local -n _check_param_options="$1"
+    local -n _check_param_args="$2"
+    local _check_param_var="$3"
 
-    if [[ " ${_check_param_args[*]} " =~ " ${_check_param_options[short]} " ]] || [[ " ${_check_param_args[*]} " =~ " ${_check_param_options[arg]} " ]]; then
+    _print_debug "check if ${_check_param_options["$_check_param_var",short]} or ${_check_param_options["$_check_param_var",arg]} are contained in: ${_check_param_args[*]}"
+
+    if [[ " ${_check_param_args[*]} " =~ " ${_check_param_options["$_check_param_var",short]} " ]] || [[ " ${_check_param_args[*]} " =~ " ${_check_param_options["$_check_param_var",arg]} " ]]; then
         return 0
     fi
 
@@ -98,61 +101,55 @@ _check_param() (
 )
 
 _check_param_with_env() (
-    local -n _check_param_with_env_args="$1"
-    local -n _check_param_with_env_options="$2"
+    local -n _check_param_with_env_options="$1"
+    local -n _check_param_with_env_args="$2"
+    local _check_param_with_env_var="$3"
 
-    if [[ ! -z "${_check_param_with_env_options[value]:+unset}" ]] && [[ -n "${_check_param_with_env_options[value]}" ]]; then
+    _print_debug "${_check_param_with_env_options["$_check_param_with_env_var",name]} is required, checking if provided."
+
+    if [[ ! -z "${_check_param_with_env_options["$_check_param_with_env_var",value]:+unset}" ]] && [[ -n "${_check_param_with_env_options["$_check_param_with_env_var",value]}" ]]; then
+        # value is required and provided as environment variable
+        _print_debug "${_check_param_with_env_options["$_check_param_with_env_var",name]} provided via environment variable."
         return 0
     fi
 
-    if ( _check_param _check_param_with_env_args _check_param_with_env_options ); then
+    if ( _check_param _check_param_with_env_options  _check_param_with_env_args "$_check_param_with_env_var" ); then
         # parameter is provided
-        # TODO: check if value is there as well (only for non-bool)
+        _print_debug "$_check_param_with_env_var provided via parameter."
         return 0
     else
-        if [[ -z "${_check_param_with_env_options[value]:+unset}" ]]; then
+        if [[ -z "${_check_param_with_env_options["$_check_param_with_env_var",value]:+unset}" ]]; then
             # value can only be provided as parameter (value not defined), but the parameter is not provided
-            _print_error "${_check_param_with_env_options[name]} parameter required but not provided."
+            _print_error "${_check_param_with_env_options["$_check_param_with_env_var",name]} parameter required but not provided."
         else
             # value can be provided as environment variable or parameter (value is defined but empty), but the parameter is not provided in either way
-            _print_error "${_check_param_with_env_options[name]} environment variable or parameter required but not provided."
+            _print_error "${_check_param_with_env_options["$_check_param_with_env_var",name]} environment variable or parameter required but not provided."
         fi
     fi
     return 1
 )
 
-_check_row() (
-    local -n _check_row_args="$1"
-    local -n _check_row_lookup="$2"
+check_requirements() {
+    local -n _check_requirements_options="$1"
+    local -n _check_requirements_args="$2"
 
-    if [[ "${_check_row_lookup[required]}" == "true" ]]; then
-        _check_param_with_env _check_row_args _check_row_lookup || return 1
-    fi
-)
-
-
-check_requirements() (
-    local -n _check_requirements_args="$1"
-    local -n _check_requirements_options="$2"
-
+    _print_debug "checking requirements"
 
     declare -A _check_requirements_rows
     declare -A _check_requirements_cols
     _get_keys_matrix _check_requirements_options _check_requirements_rows _check_requirements_cols
 
-    # Check all options row by row (so for each variable)
+    # Iterate all variables (rows of the option matrix) and check if the required parameters are set
+    # No sanity or value check here, we only check if all parameters are provided
     for var in "${!_check_requirements_rows[@]}"; do
-        declare -A _row
-        for attr in "${!_check_requirements_cols[@]}"; do
-            # If an attribute is set in the options, we add it to our row in order to check
-            if [[ ! -z "${_check_requirements_options[$var,$attr]:+unset}" ]]; then
-                _row+=(["$attr"]="${_check_requirements_options[$var,$attr]}")
+        if [[ "${_check_requirements_options[$var,required]:-}" != "true" ]]; then 
+            _print_debug "${_check_requirements_options[$var,name]:-} not required, skipping"
+            continue
             fi
+        _check_param_with_env _check_requirements_options _check_requirements_args "$var" || return 1
         done
 
-        _check_row _check_requirements_args _row
-        unset _row
-    done
+    _print_debug_success "All required parameters are provided. Continuing with sanity check."
 
     local i=0
     while (( i < ${#_check_requirements_args[@]} )); do # args provided by user
