@@ -1,7 +1,7 @@
 #! /usr/bin/env nix-shell
 #! nix-shell -i bash
 #! nix-shell --pure
-#! nix-shell --keep ENV1 --keep ENV2
+#! nix-shell --keep ENV1 --keep ENV2 --keep DEBUG
 #! nix-shell -p hello
 
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail
