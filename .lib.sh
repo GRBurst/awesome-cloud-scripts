@@ -133,7 +133,11 @@ _assign() {
     local -n _assign_args="$1"
 
     if [[ -n "${3:-}" ]]; then
-        _assign_args["$2,value"]="$3"
+        if [[ -n "${_assign_args["$2",value]:+unset}" ]] && (( "${_assign_args["$2",pos]:-1}" > 1)); then
+            _assign_args+=( ["$2,value"]+=" $3" )
+        else
+            _assign_args["$2,value"]="$3"
+        fi
         return 0
     else
         _print_error "Missing value for ${_assign_args[$2,name]}"
@@ -243,7 +247,7 @@ check_requirements() {
             local next_user_argument="${_check_requirements_args[$j]}"
             _print_debug "    |next_user_argument[$j] = $next_user_argument"
 
-            # Check if the next argument is not a
+            # Check if the next argument is not a parameter etc
             for next_var in "${!_check_requirements_rows[@]}"; do # all variables from options
                 local next_argument_option="${_check_requirements_options[$next_var,arg]}"
                 local next_argument_option_short="${_check_requirements_options[$next_var,short]}"
@@ -294,8 +298,8 @@ check_requirements() {
 }
 
 configure() {
-    local -n _configure_args="$1"
-    local -n _configure_options="$2"
+    local -n _configure_options="$1"
+    local -n _configure_args="$2"
 
     if (( ${#_configure_args[@]} == 0 )) || (( ${#_configure_options[@]} == 0)); then
         return 0
@@ -305,19 +309,30 @@ configure() {
     declare -A _configure_options_cols
     _get_keys_matrix _configure_options _configure_options_rows _configure_options_cols
 
-    # Go through all parameter option
-    for var in "${!_configure_options_rows[@]}"; do
-        for i in "${!_configure_args[@]}"; do
-            # Compare if short or long parameter is provided
-            if [[ "${_configure_args[$i]}" == "${_configure_options[$var,arg]}" ]] || [[ "${_configure_args[$i]}" == "${_configure_options[$var,short]}" ]]; then
-                # If not of type boolean / switch, we read the next argument (which should be the value)
-                if [[ "${_configure_options[$var,tpe]:-}" != "bool" ]]; then
-                    _assign _configure_options "$var" "${_configure_args[$((i+1))]:-}"
-                else
-                    _assign _configure_options "$var" "true"
-                fi
-            fi
-        done
+    local total_args_length="${#_configure_args[@]}"
+    local -i i=0
+    while (( i < total_args_length )); do # Iterate all user provided args
+        local user_argument="${_configure_args[$i]}"
+        _print_debug "configure user_argument[$i] = $user_argument"
+
+        # Get current variable name for parameter
+        local var="$(_get_variable_from_param _configure_options "$user_argument")"
+
+        local argument_option="${_configure_options[$var,arg]}"
+        local argument_option_short="${_configure_options[$var,short]}"
+
+        if [[ "${_configure_options[$var,tpe]:-}" == "bool" ]]; then
+            _assign _configure_options "$var" "true"
+            let i++
+        else
+            local user_arg_pos=${_configure_options[$var,pos]:-1}
+            local -i j=1
+            while ((j <= user_arg_pos)); do
+                _assign _configure_options "$var" "${_configure_args[$((i+j))]:-}"
+                let j++
+            done
+            let i=$((i+user_arg_pos+1))
+        fi
     done
 }
 
@@ -372,7 +387,7 @@ process_args() {
     local -n _process_args_args="$2"
     local -n _process_args_params="$3"
 
-    configure _process_args_args _process_args_options || _print_debug "configure terminated with $?"
+    configure _process_args_options _process_args_args || _print_debug "configure terminated with $?"
     translate_args _process_args_options || _print_debug "translate terminated with $?"
     get_args _process_args_params || _print_debug "get_args terminated with $?"
 }
