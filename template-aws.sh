@@ -1,7 +1,5 @@
 #! /usr/bin/env nix-shell
 #! nix-shell -i bash
-#! nix-shell --pure
-#! nix-shell --keep AWS_PROFILE --keep DEBUG
 #! nix-shell -p awscli2 aws-vault
 
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail
@@ -14,11 +12,11 @@ source lib.sh
 
 
 # Configure your parameters here. The provided 
-declare -A template_aws_options=(
+declare -A options=(
     [p,arg]="--profile" [p,value]="${AWS_PROFILE:-}" [p,short]="-p" [p,required]=true [p,name]="aws profile"
 )
 # This will contain the resulting parameters of your command
-declare -a template_aws_params
+declare -a params
 
 # Define your usage and help message here
 usage() (
@@ -36,20 +34,27 @@ Usage and Examples
     $script_name
 
 
-$(_generate_usage template_aws_options)
+$(_generate_usage options)
 
 USAGE
 )
 
 # Put your script logic here
 run() (
-    # Use all the parameter with the defined array template_aws_params
-    # aws sts get-caller-identity "${template_aws_params[@]}"
+    # Use all the parameter with the defined array params
+    # aws sts get-caller-identity "${params[@]}"
 
-    # Or access a dedicated variable by using get_args yourself
-    local -a p_params
-    get_args p_params "p"
-    aws sts get-caller-identity "${p_params[@]}"
+    # Or access a dedicated variable array by using get_args yourself
+    # local -a p_params
+    # get_args p_params "p"
+    # aws sts get-caller-identity "${p_params[@]}"
+
+    # Or access a dedicated arg string (don't quote subshell)
+    aws sts get-caller-identity $(get_args_str p)
+
+    # Or store the arg string in a variable before
+    # local p="$(get_args_str p)"
+    # aws sts get-caller-identity $p
 )
 
 
@@ -58,9 +63,9 @@ self() (
     declare -a args=( "$@" )
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    elif (check_requirements template_aws_options args); then
+    elif (check_requirements options args); then
 
-        process_args template_aws_options args template_aws_params || _print_debug "Couldn't process args, terminated with $?"
+        process_args options args params || _print_debug "Couldn't process args, terminated with $?"
 
         run
     else

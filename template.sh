@@ -27,7 +27,7 @@ source lib.sh
 # If you don't want it to be set by an environment variable (so it can only be configured by parameters),
 # you must not (!) define it for the build in evaluation to work.
 #   -> In our case: [p1,value], [p2,value] and [b,value] are not defined in the array
-declare -A template_options=(
+declare -A options=(
     [e1,arg]="--env1" [e1,value]="${ENV1:-}" [e1,short]="-e1" [e1,required]=true  [e1,name]="ENV1"
     [e2,arg]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2" [e2,required]=false [e2,name]="ENV2"
     [p1,arg]="--par1"                        [p1,short]="-p1" [p1,required]=true  [p1,name]="PAR1"
@@ -35,7 +35,7 @@ declare -A template_options=(
     [b,arg]="--bool"                         [b,short]="-b"   [b,required]=false  [b,name]="Bool Switch" [b,tpe]="bool"
 )
 # This will contain the resulting parameters of your command
-declare -a template_params
+declare -a params
 
 # Define your usage and help message here
 usage() (
@@ -53,7 +53,7 @@ Usage and Examples
     $script_name
 
 
-$(_generate_usage template_options)
+$(_generate_usage options)
 
 USAGE
 )
@@ -73,8 +73,10 @@ run() (
     get_args p1_params "p1"
     hello -g "hello ${p1_params[*]}"
 
-    # Or Use all the parameter with the defined array template_params
-    hello -g "hello ${template_params[*]}"
+    hello -g "hello $(get_args_str p1)"
+
+    # Or Use all the parameter with the defined array params
+    hello -g "hello ${params[*]}"
 
 
 )
@@ -85,9 +87,9 @@ self() (
     declare -a args=( "$@" )
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    elif (check_requirements template_options args); then
+    elif (check_requirements options args); then
 
-        process_args template_options args template_params || _print_debug "Couldn't process args, terminated with $?"
+        process_args options args params || _print_debug "Couldn't process args, terminated with $?"
 
         run
     else
