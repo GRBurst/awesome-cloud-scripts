@@ -200,6 +200,7 @@ check_requirements() {
     # 3. If the parameter is not required, we still have to check its sanity by precessing all steps from 2.
 
     local total_args_length="${#_check_requirements_args[@]}"
+    _print_debug "Total of $total_args_length arguments"
     local i=0
     while (( i < total_args_length )); do # Iterate all user provided args
         local user_argument="${_check_requirements_args[$i]}"
@@ -242,7 +243,7 @@ check_requirements() {
 
         local j=$((i+1))
         # Search all following arguments for valid values
-        while (( j < total_args_length )); do
+        while (( j <= i+user_arg_pos )); do
             if [[ -z "${_check_requirements_args[$j]:+unset}" ]]; then
                 _print_error "Aborting. Not enough values provided for parameter ${_check_requirements_options[$var,name]}."
                 return 1
