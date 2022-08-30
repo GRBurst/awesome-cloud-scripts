@@ -387,23 +387,28 @@ get_args() {
 }
 
 get_args_str() {
+    local -a _get_args_str_res
     local _get_args_str="${1:-}"
-    local -a _get_args_res
 
-    if [[ -z "$_get_args_str" ]]; then
-        for key in "${_lib_params_order[@]}"; do
-            _get_args_res+=( "${_lib_params_assoc[$key]}" )
-        done
-    else
-        for key in "${_lib_params_order[@]}"; do
-            IFS=',' read -ra _key_arr <<< "${key}"
-            if [[ "${_key_arr[0]}" == "$_get_args_str" ]]; then
-                _get_args_res+=( "${_lib_params_assoc[$key]}" )
-            fi
-        done
+    get_args _get_args_str_res "$_get_args_str"
+    echo "${_get_args_str_res[@]}"
+}
 
-    fi
-    echo "${_get_args_res[@]}"
+get_values() {
+    local -a _get_values_args_res
+    local -n _get_values_res=$1
+    local _get_values_var="${2:-}"
+
+    get_args _get_values_args_res "$_get_values_var"
+    _get_values_res=( ${_get_values_args_res[@]:1} )
+}
+
+get_values_str() {
+    local -a _get_values_str_res
+    local _get_values_str="${1:-}"
+
+    get_values _get_values_str_res "$_get_values_str"
+    echo "${_get_values_str_res[@]}"
 }
 
 process_args() {
