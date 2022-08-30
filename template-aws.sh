@@ -13,13 +13,18 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 source lib.sh
 
+# This will contain the resulting parameters of your command
+declare -a params
 
-# Configure your parameters here. The provided 
+
+############################################
+########## BEGIN OF CUSTOMISATION ##########
+############################################
+
+# Configure your parameters here
 declare -A options=(
     [p,arg]="--profile" [p,value]="${AWS_PROFILE:-}" [p,short]="-p" [p,required]=true [p,name]="aws profile"
 )
-# This will contain the resulting parameters of your command
-declare -a params
 
 # Define your usage and help message here
 usage() (
@@ -58,6 +63,10 @@ run() (
     # aws sts get-caller-identity $p
 )
 
+
+############################################
+########### END OF CUSTOMISATION ###########
+############################################
 
 # This is the base frame and it shouldn't be necessary to touch it
 self() (

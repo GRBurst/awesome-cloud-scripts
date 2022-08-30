@@ -12,6 +12,13 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 source lib.sh
 
+# This will contain the resulting parameters of your command
+declare -a params
+
+
+############################################
+########## BEGIN OF CUSTOMISATION ##########
+############################################
 
 # Configure your variables and parameters here.
 # We destinguish between variables and attributes and interprete the key of as 2-dim arrays.
@@ -34,8 +41,6 @@ declare -A options=(
     [p2,arg]="--par2"                        [p2,short]="-p2" [p2,required]=false [p2,name]="PAR2"       [p2,pos]=2
     [b,arg]="--bool"                         [b,short]="-b"   [b,required]=false  [b,name]="Bool Switch" [b,tpe]="bool"
 )
-# This will contain the resulting parameters of your command
-declare -a params
 
 # Define your usage and help message here
 usage() (
@@ -73,12 +78,15 @@ run() (
 
     hello -g "hello $(get_args_str p1)"
 
-    # Or Use all the parameter with the defined array params
+    # Or use all the parameter with the defined array params
     hello -g "hello ${params[*]}"
-
 
 )
 
+
+############################################
+########### END OF CUSTOMISATION ###########
+############################################
 
 # This is the base frame and it shouldn't be necessary to touch it
 self() (
