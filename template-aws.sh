@@ -25,20 +25,18 @@ declare -a params
 usage() (
     local script_name="${0##*/}"
     cat <<-USAGE
-
 Template for AWS scripts.
 Please have a look at template.sh as well.
 
 
 Usage and Examples
------
+---------
 
 - Print information about aws script call:
     $script_name
 
 
 $(_generate_usage options)
-
 USAGE
 )
 

@@ -1,9 +1,14 @@
 #! /usr/bin/env bash
 
+set -Eeuo pipefail
+
+# cd to script location
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
 # [[ "$(./template-aws.sh -p nocode-dev | jq -r '.UserId' | cut -d ':' -f2 | cut -d "." -f1 )"=="julius" ]]; res $? "template-aws"
 
 ./test-unit.sh \
-    --name "missing par1 par" \
+    --name "without parameters, missing par1 par error" \
     --expected-result "[ERROR] PAR1 parameter required but not provided."
 
 ./test-unit.sh \
@@ -22,12 +27,12 @@
     --parameters "-p1 foo -e1"
 
 ENV1="bar" ./test-unit.sh \
-    --name "missing env1 val" \
+    --name "missing env1 value when parameter overwrites environement" \
     --expected-result "[ERROR] Aborting. Not enough values provided for last parameter ENV1" \
     --parameters "-p1 foo -e1"
 
 ./test-unit.sh \
-    --name "template" \
+    --name "template with required parameters" \
     --expected-result "hello --par1 foo --env1 bar" \
     --parameters "-p1 foo -e1 bar"
 

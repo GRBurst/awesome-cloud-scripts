@@ -41,20 +41,18 @@ declare -a params
 usage() (
     local script_name="${0##*/}"
     cat <<-USAGE
-
 Explain what this script does and exit.
 Describes the nix-shell parameter and provides template for scripts.
 
 
 Usage and Examples
------
+---------
 
 - Print information about nix-shell parameters:
     $script_name
 
 
 $(_generate_usage options)
-
 USAGE
 )
 

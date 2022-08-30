@@ -31,7 +31,14 @@ _print_debug_success() (
 )
 
 _print_var_usage() (
-    printf '\n  %s | %s \t# %s %s' "$1" "$2" "$3" "$4"
+    printf '\n%4s | %-30s # %s %s' "$1" "$2" "$3" "$4"
+)
+_print_section_usage() (
+    if [[ -n "${2:-}" ]]; then 
+        printf '\n\n%s:%s\n' "$1" "$2"
+    else
+        echo ""
+    fi
 )
 
 _generate_usage() (
@@ -62,19 +69,19 @@ _generate_usage() (
         fi
     done
 
-    cat <<-USAGE
+    local usage_string="$(cat <<-USAGE
 Arguments and Environment
 ---------
 
-$([[ -n "${_generate_usage_required_env:-}" ]] && echo "Required environment: ${_generate_usage_required_env}")
-
-$([[ -n "${_generate_usage_optional_env:-}" ]] && echo "Optional environment: ${_generate_usage_optional_env}")
-
-$([[ -n "${_generate_usage_required:-}" ]] && echo "Required arguments: ${_generate_usage_required}")
-
-$([[ -n "${_generate_usage_optional:-}" ]] && echo "Optional arguments: ${_generate_usage_optional}")
-
 USAGE
+)"
+
+    usage_string+="$(_print_section_usage "Required environment" "${_generate_usage_required_env:-}" )"
+    usage_string+="$(_print_section_usage "Optional environment" "${_generate_usage_optional_env:-}" )"
+    usage_string+="$(_print_section_usage "Required arguments"   "${_generate_usage_required:-}"     )"
+    usage_string+="$(_print_section_usage "Optional arguments"   "${_generate_usage_optional:-}"     )"
+
+    echo "$usage_string"
 )
 
 _get_keys_matrix() {

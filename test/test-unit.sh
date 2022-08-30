@@ -1,10 +1,9 @@
 #! /usr/bin/env bash
 
-# https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail
 set -Eeuo pipefail
 
-# cd to script location
-cd "$(dirname "${BASH_SOURCE[0]}")"
+# cd to scripts parent location
+cd "$(dirname "${BASH_SOURCE[0]}")/../"
 
 source lib.sh
 
@@ -20,19 +19,25 @@ declare -a params
 usage() (
     local script_name="${0##*/}"
     cat <<-USAGE
-
-Test this library.
+Runs template.sh with provided parameters and test for the expected result.
 
 
 Usage and Examples
------
+---------
 
-- Print information about nix-shell parameters:
-    $script_name
+- Run the script without parameters:
+    $script_name \\
+    --name "missing par1 par" \\
+    --expected-result "[ERROR] PAR1 parameter required but not provided."
+
+- Run the script with all required parameters:
+    $script_name \\
+    --name "template" \\
+    --expected-result "hello --par1 foo --env1 bar" \\
+    --parameters "-p1 foo -e1 bar"
 
 
 $(_generate_usage options)
-
 USAGE
 )
 
