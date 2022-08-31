@@ -13,19 +13,18 @@ declare -A _lib_params_assoc
 declare -a _lib_params_order
 
 _print_error() (
-    local _print_error_msg="$@"
+    local _print_error_msg="$*"
     echo -e "\e[31m[ERROR] ${_print_error_msg}\e[0m"
-    # exit 1
 )
 _print_debug() (
     if [[ "${DEBUG:-}" == "true" ]]; then
-        local _print_debug_msg="$@"
+        local _print_debug_msg="$*"
         echo -e "\e[36m[DEBUG] ${_print_debug_msg}\e[0m"
     fi
 )
 _print_debug_success() (
     if [[ "${DEBUG:-}" == "true" ]]; then
-        local _print_debug_msg="$@"
+        local _print_debug_msg="$*"
         echo -e "\e[32m[DEBUG] ${_print_debug_msg}\e[0m"
     fi
 )
@@ -69,7 +68,8 @@ _generate_usage() (
         fi
     done
 
-    local usage_string="$(cat <<-USAGE
+    local usage_string
+    usage_string="$(cat <<-USAGE
 Arguments and Environment
 ---------
 
@@ -103,7 +103,9 @@ _check_param() (
 
     _print_debug "check if ${_check_param_options["$_check_param_var",short]} or ${_check_param_options["$_check_param_var",arg]} are contained in: ${_check_param_args[*]}"
 
-    if [[ " ${_check_param_args[*]} " =~ " ${_check_param_options["$_check_param_var",short]} " ]] || [[ " ${_check_param_args[*]} " =~ " ${_check_param_options["$_check_param_var",arg]} " ]]; then
+    if [[ "${_check_param_args[*]}" =~ ${_check_param_options["$_check_param_var",short]} ]] \
+        || [[ "${_check_param_args[*]}" =~ ${_check_param_options["$_check_param_var",arg]} ]]
+    then
         return 0
     fi
 
@@ -117,7 +119,7 @@ _check_param_with_env() (
 
     _print_debug "${_check_param_with_env_options["$_check_param_with_env_var",name]} is required, checking if provided."
 
-    if [[ ! -z "${_check_param_with_env_options["$_check_param_with_env_var",value]:+unset}" ]] && [[ -n "${_check_param_with_env_options["$_check_param_with_env_var",value]}" ]]; then
+    if [[ -n "${_check_param_with_env_options["$_check_param_with_env_var",value]:+unset}" ]] && [[ -n "${_check_param_with_env_options["$_check_param_with_env_var",value]}" ]]; then
         # value is required and provided as environment variable
         _print_debug "${_check_param_with_env_options["$_check_param_with_env_var",name]} provided via environment variable."
         return 0
@@ -214,18 +216,17 @@ check_requirements() {
         _print_debug "checking user_argument[$i] = $user_argument"
 
         # Get current variable name for parameter
-        local var="$(_get_variable_from_param _check_requirements_options "$user_argument")"
+        local var
+        var="$(_get_variable_from_param _check_requirements_options "$user_argument")"
 
         # Current argument is not found in options, continue search for parameters
         if [[ -z "$var" ]]; then
             _print_debug "  |$user_argument is not a recognized option, continuing."
-            let i++
+            ((i++))
             continue
         fi
 
         _print_debug "  |Starting options loop with var = $var, ${_check_requirements_options[$var,arg]:-}"
-        local argument_option="${_check_requirements_options[$var,arg]}"
-        local argument_option_short="${_check_requirements_options[$var,short]}"
 
         # If the variable is has a type set and the type is boolean (tpe == bool),
         # we don't have to check the argument and continue
@@ -233,7 +234,7 @@ check_requirements() {
             && [[ "${_check_requirements_options[$var,tpe]:-}" == "bool" ]]; then
             _check_requirements_options+=( ["$var",_checked]="true" )
             _print_debug "  |$user_argument is boolean, skipping further checks"
-            let i++
+            ((i++))
             continue
         fi
 
@@ -273,7 +274,7 @@ check_requirements() {
                 # If the argument equals a parameter, but that parameter is alreay checked correctly,
                 # e.g. it was provided before and checked, we can continue
                 if [[ "${_check_requirements_options[$next_var,_checked]:-}" == "true" ]]; then
-                    _print_debug "      |$next_var[$j] is checked already, therefore this can be a valid value"
+                    _print_debug "      |[$j]$next_var is checked already, therefore this can be a valid value"
                     continue
                 fi
 
@@ -282,11 +283,11 @@ check_requirements() {
                 local -i k=$((i+user_arg_pos+1))
                 while (( k < total_args_length )); do # args provided by user
                     if [[ "$(_get_variable_from_param _check_requirements_options "$next_user_argument")" == "$(_get_variable_from_param _check_requirements_options "${_check_requirements_args[$k]}")" ]]; then
-                        _print_debug "        |$next_user_argument[$j] is provided again later in the _check_requirements_args[$k]"
+                        _print_debug "        |[$j]$next_user_argument is provided again later in the _check_requirements_args[$k]"
                         continue 2
                     fi
                     _print_debug "Lookahead argument is not the parameter $next_user_argument != ${_check_requirements_args[$k]}"
-                    let k++
+                    ((k++))
                 done
 
                 _print_error "Aborting. Value of $user_argument is $next_user_argument, which is a parameter, too. However, we couldn't find another $next_user_argument, so it seems like not enough argument are provided. The parameter $user_argument needs $user_arg_pos parameter(s)."
@@ -294,7 +295,7 @@ check_requirements() {
 
             done
 
-            let j++
+            ((j++))
             _print_debug "    |next value"
 
         done
@@ -302,7 +303,7 @@ check_requirements() {
         _print_debug_success "successfully checked $var($user_argument)"
         _check_requirements_options+=( ["$var",_checked]="true" )
         _print_debug "|next parameter"
-        let i=$((i+user_arg_pos+1))
+        ((i=i+user_arg_pos+1))
     done
 
     return 0
@@ -327,22 +328,20 @@ configure() {
         _print_debug "configure user_argument[$i] = $user_argument"
 
         # Get current variable name for parameter
-        local var="$(_get_variable_from_param _configure_options "$user_argument")"
-
-        local argument_option="${_configure_options[$var,arg]}"
-        local argument_option_short="${_configure_options[$var,short]}"
+        local var
+        var="$(_get_variable_from_param _configure_options "$user_argument")"
 
         if [[ "${_configure_options[$var,tpe]:-}" == "bool" ]]; then
             _assign _configure_options "$var" "true"
-            let i++
+            ((i++))
         else
             local user_arg_pos=${_configure_options[$var,pos]:-1}
             local -i j=1
             while ((j <= user_arg_pos)); do
                 _assign _configure_options "$var" "${_configure_args[$((i+j))]:-}"
-                let j++
+                ((j++))
             done
-            let i=$((i+user_arg_pos+1))
+            (( i=i+user_arg_pos+1 ))
         fi
     done
 }
@@ -403,11 +402,12 @@ get_args_str() {
 
 get_values() {
     local -a _get_values_args_res
-    local -n _get_values_res=$1
+    local -n _get_values_res="$1"
     local _get_values_var="${2:-}"
 
     get_args _get_values_args_res "$_get_values_var"
-    _get_values_res=( ${_get_values_args_res[@]:1} )
+
+    readarray -t _get_values_res <<< "${_get_values_args_res[@]:1}"
 }
 
 get_values_str() {

@@ -48,9 +48,10 @@ run() (
     fail()      ( echo -e "\e[31m[   FAIL] $1 failed\e[0m" )
     success()   ( echo -e "\e[32m[SUCCESS] $1 succeeded\e[0m" )
 
-    local name="$(get_values_str n)"
-    local msg="$(get_values_str e)"
-    local pars="$(get_values_str p)"
+    local name msg pars
+    name="$(get_values_str n)"
+    msg="$(get_values_str e)"
+    pars="$(get_values_str p)"
 
     [[ "$(./template.sh $pars | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
 )

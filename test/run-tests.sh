@@ -82,11 +82,11 @@ ENV1="bar" ./test-unit.sh \
     --parameters "-p1 par -e1 env -p2 foo"
 
 ./test-unit.sh \
---name "    template with par2" \
+--name "template with par2" \
     --expected-result "hello --par1 par --par2 foo bar --env1 env" \
     --parameters "-p1 par -e1 env -p2 foo bar"
 
 ./test-unit.sh \
---name "    template with par2 and missing env1" \
+--name "template with par2 and missing env1" \
     --expected-result "[ERROR] Aborting. Value of -e1 is -p2, which is a parameter, too." \
     --parameters "-p1 par -e1 -p2 foo bar"
