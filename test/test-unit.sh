@@ -2,10 +2,8 @@
 
 set -Eeuo pipefail
 
-# cd to scripts parent location
-cd "$(dirname "${BASH_SOURCE[0]}")/../"
-
-source lib.sh
+declare script_path="$(dirname "${BASH_SOURCE[0]}")"
+source "$script_path/../lib.sh"
 
 declare -A options=(
     [n,arg]="--name"            [n,short]="-n" [n,required]=true  [n,name]="name"
@@ -53,7 +51,7 @@ run() (
     msg="$(get_values_str e)"
     pars="$(get_values_str p)"
 
-    [[ "$(./template.sh $pars | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
+    [[ "$($script_path/../template.sh $pars | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
 )
 
 
