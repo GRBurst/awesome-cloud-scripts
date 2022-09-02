@@ -40,6 +40,22 @@ _print_section_usage() (
     fi
 )
 
+_get_keys_matrix() {
+    local -n _get_keys_matrix_assoc="$1"
+    local -n _get_keys_matrix_rows="$2"
+    local -n _get_keys_matrix_cols="$3"
+    # We create two arrays for the rows and column keys that doesn't contain duplicates
+    for var in "${!_get_keys_matrix_assoc[@]}"; do
+        IFS=',' read -ra _key_arr <<< "${var}"
+        if [[ -n "${_key_arr[0]+unset}" ]]; then
+            _get_keys_matrix_rows["${_key_arr[0]}"]=1
+        fi
+        if [[ -n "${_key_arr[1]+unset}" ]]; then
+            _get_keys_matrix_cols["${_key_arr[1]}"]=1
+        fi
+    done
+}
+
 _generate_usage() (
     local -n _generate_usage_options="$1"
 
@@ -55,15 +71,15 @@ _generate_usage() (
     for var in "${!_generate_usage_rows[@]}"; do
         if [[ -n "${_generate_usage_options[$var,value]+unset}" ]]; then
             if [[ "${_generate_usage_options[$var,required]}" == "true" ]]; then
-                _generate_usage_required_env+="$(_print_var_usage "${_generate_usage_options[$var,short]}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "variable or argument")"
+                _generate_usage_required_env+="$(_print_var_usage "${_generate_usage_options[$var,short]:-}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "variable or argument")"
             else
-                _generate_usage_optional_env+="$(_print_var_usage "${_generate_usage_options[$var,short]}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "variable or argument")"
+                _generate_usage_optional_env+="$(_print_var_usage "${_generate_usage_options[$var,short]:-}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "variable or argument")"
             fi
         else
             if [[ "${_generate_usage_options[$var,required]}" == "true" ]]; then
-                _generate_usage_required+="$(_print_var_usage "${_generate_usage_options[$var,short]}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "argument")"
+                _generate_usage_required+="$(_print_var_usage "${_generate_usage_options[$var,short]:-}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "argument")"
             else
-                _generate_usage_optional+="$(_print_var_usage "${_generate_usage_options[$var,short]}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "argument")"
+                _generate_usage_optional+="$(_print_var_usage "${_generate_usage_options[$var,short]:-}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "argument")"
             fi
         fi
     done
@@ -84,26 +100,81 @@ USAGE
     echo "$usage_string"
 )
 
-_get_keys_matrix() {
-    local -n _get_keys_matrix_assoc="$1"
-    local -n _get_keys_matrix_rows="$2"
-    local -n _get_keys_matrix_cols="$3"
-    # We create two arrays for the rows and column keys that doesn't contain duplicates
-    for var in "${!_get_keys_matrix_assoc[@]}"; do
-        IFS=',' read -ra _key_arr <<< "${var}"
-        _get_keys_matrix_rows["${_key_arr[0]}"]=1
-        _get_keys_matrix_cols["${_key_arr[1]}"]=1
+_print_option_matrix() (
+    local -n _print_option_matrix_options="$1"
+    local -n _print_option_matrix_err_vars="$2"
+
+    local -A _print_option_matrix_rows
+    local -A _print_option_matrix_cols
+
+    _get_keys_matrix _print_option_matrix_options _print_option_matrix_rows _print_option_matrix_cols
+
+
+    # local _red_color="$(tput setaf 1)"
+    # local _normal_color="$(tput sgr0)"
+    # echo -e "\e[31m[ERROR] ${_print_error_msg}\e[0m"
+    local _var_length=0
+    for var in "${!_print_option_matrix_rows[@]}"; do
+        if (( ${#var} > _var_length )); then 
+            _var_length=${#var}
+        fi
     done
-}
+    for var in "${!_print_option_matrix_rows[@]}"; do
+        for arg in "${!_print_option_matrix_cols[@]}"; do
+            local _cell_length=0
+            (( _cell_length=${_var_length}+${#arg}+3 ))
+            if [[ -z "${_print_option_matrix_options[$var,$arg]+unset}" ]]; then
+                printf "%${_cell_length}s" "   "
+            elif [[ "${_print_option_matrix_err_vars[*]}" =~ "$var" ]]; then
+                # printf '%14s | ' "${_red_color}[$var,$arg]${_normal_color}"
+                printf "\e[1m\e[31m%${_cell_length}s\e[0m" "[$var,$arg]"
+            else
+                printf "%${_cell_length}s" "[$var,$arg]"
+            fi
+            printf " | "
+        done
+        echo ""
+    done
+
+)
+
+_check_options() (
+    local -n _check_options_options="$1"
+    local -a _check_options_error_vars
+    local -A _check_options_rows
+    local -A _check_options_cols
+
+    _get_keys_matrix _check_options_options _check_options_rows _check_options_cols
+
+    for var in "${!_check_options_rows[@]}"; do
+        if [[ -z "${_check_options_options[$var,arg]:+unset}" ]]; then
+            _print_error "[$var,arg] missing. Please provide a (long) argument by adding [$var,arg] to your options."
+            _check_options_error_vars+=( "$var" )
+        fi
+
+        if [[ -z "${_check_options_options[$var,required]:+unset}" ]]; then
+            _print_error "[$var,required] missing. Please define the required argument by adding [$var,required] to your options."
+            _check_options_error_vars+=( "$var" )
+        fi
+    done
+    if [[ -n "${_check_options_error_vars:+unset}" ]]; then
+        _print_error "Found ${#_check_options_error_vars} errors"
+        _print_option_matrix _check_options_options _check_options_error_vars
+        exit 1
+    fi
+)
 
 _check_param() (
     local -n _check_param_options="$1"
     local -n _check_param_args="$2"
     local _check_param_var="$3"
 
-    _print_debug "check if ${_check_param_options["$_check_param_var",short]} or ${_check_param_options["$_check_param_var",arg]} are contained in: ${_check_param_args[*]}"
+    _print_debug "check if any of (\
+${_check_param_options["$_check_param_var",short]:+" ${_check_param_options["$_check_param_var",short]}, "}\
+${_check_param_options["$_check_param_var",arg]}\
+) are contained in: ${_check_param_args[*]})"
 
-    if [[ "${_check_param_args[*]}" =~ ${_check_param_options["$_check_param_var",short]} ]] \
+    if [[ "${_check_param_args[*]}" =~ ${_check_param_options["$_check_param_var",short]:-} ]] \
         || [[ "${_check_param_args[*]}" =~ ${_check_param_options["$_check_param_var",arg]} ]]
     then
         return 0
@@ -168,7 +239,7 @@ _get_variable_from_param() (
     _get_keys_matrix _get_variable_from_param_options _get_variable_from_param_rows _get_variable_from_param_cols
     for var in "${!_get_variable_from_param_rows[@]}"; do
         if [[ "$_get_variable_from_param_param" == "${_get_variable_from_param_options[$var,arg]}" ]] \
-            || [[ "$_get_variable_from_param_param" == "${_get_variable_from_param_options[$var,short]}" ]]; then 
+            || [[ "$_get_variable_from_param_param" == "${_get_variable_from_param_options[$var,short]:-}" ]]; then 
             res="$var"
         fi
     done
@@ -178,6 +249,8 @@ _get_variable_from_param() (
 check_requirements() {
     local -n _check_requirements_options="$1"
     local -n _check_requirements_args="$2"
+
+    _check_options _check_requirements_options || return 1
 
     _print_debug "checking requirements"
 
@@ -262,7 +335,7 @@ check_requirements() {
             # Check if the next argument is not a parameter etc
             for next_var in "${!_check_requirements_rows[@]}"; do # all variables from options
                 local next_argument_option="${_check_requirements_options[$next_var,arg]}"
-                local next_argument_option_short="${_check_requirements_options[$next_var,short]}"
+                local next_argument_option_short="${_check_requirements_options[$next_var,short]:-}"
 
                 # If the next argument does not equal a parameter, we are save to continue
                 if [[ "$next_user_argument" != "$next_argument_option" ]] \
@@ -338,6 +411,7 @@ configure() {
             local user_arg_pos=${_configure_options[$var,pos]:-1}
             local -i j=1
             while ((j <= user_arg_pos)); do
+                _print_debug "_assign _configure_options $var ${_configure_args[$((i+j))]:-}"
                 _assign _configure_options "$var" "${_configure_args[$((i+j))]:-}"
                 ((j++))
             done
