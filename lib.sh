@@ -7,7 +7,7 @@ if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
 fi
 
 trap 'cleanup $? $LINENO' ERR
-cleanup() ( echo "Error: (${1:-}) occurred on line ${2:-}" )
+cleanup() ( >&2 echo "Error: (${1:-}) occurred on line ${2:-}" )
 
 declare -A _lib_params_assoc
 declare -a _lib_params_order
@@ -19,13 +19,13 @@ _print_error() (
 _print_debug() (
     if [[ "${DEBUG:-}" == "true" ]]; then
         local _print_debug_msg="$*"
-        echo -e "\e[36m[DEBUG] ${_print_debug_msg}\e[0m"
+        >&2 echo -e "\e[36m[DEBUG] ${_print_debug_msg}\e[0m"
     fi
 )
 _print_debug_success() (
     if [[ "${DEBUG:-}" == "true" ]]; then
         local _print_debug_msg="$*"
-        echo -e "\e[32m[DEBUG] ${_print_debug_msg}\e[0m"
+        >&2 echo -e "\e[32m[DEBUG] ${_print_debug_msg}\e[0m"
     fi
 )
 
