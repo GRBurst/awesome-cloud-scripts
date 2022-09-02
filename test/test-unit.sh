@@ -50,8 +50,11 @@ run() (
     name="$(get_values_str n)"
     msg="$(get_values_str e)"
     pars="$(get_values_str p)"
+ 
+    local -a parameter_args
+    get_array_from_str parameter_args "$pars"
 
-    [[ "$($script_path/../template.sh $pars | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
+    [[ "$($script_path/../template.sh "${parameter_args[@]}" | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
 )
 
 

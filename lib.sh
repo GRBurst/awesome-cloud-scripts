@@ -492,6 +492,14 @@ get_values_str() {
     echo "${_get_values_str_res[@]}"
 }
 
+get_array_from_str() {
+    local -n _get_array_from_str_arr="$1"
+    local _get_array_from_str_var="$2"
+
+    declare -a "_get_array_from_str_tmp=( $_get_array_from_str_var )"
+    _get_array_from_str_arr=("${_get_array_from_str_tmp[@]}")
+}
+
 process_args() {
     local -n _process_args_options="$1"
     local -n _process_args_args="$2"

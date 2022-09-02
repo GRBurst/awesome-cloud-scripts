@@ -82,11 +82,31 @@ ENV1="bar" ./test-unit.sh \
     --parameters "-p1 par -e1 env -p2 foo"
 
 ./test-unit.sh \
---name "template with par2" \
+    --name "template with par2" \
     --expected-result "hello --par1 par --par2 foo bar --env1 env" \
     --parameters "-p1 par -e1 env -p2 foo bar"
 
 ./test-unit.sh \
---name "template with par2 and missing env1" \
+    --name "template with par2 and missing env1" \
     --expected-result "[ERROR] Aborting. Value of -e1 is -p2, which is a parameter, too." \
     --parameters "-p1 par -e1 -p2 foo bar"
+
+./test-unit.sh \
+    --name "template with quoted, spaced parameter" \
+    --expected-result "hello --par1 foo bar --env1 muh" \
+    --parameters '-p1 "foo bar" -e1 muh'
+
+./test-unit.sh \
+    --name "template with 2 quoted, spaced parameter" \
+    --expected-result "hello --par1 foo bar --env1 moo mar" \
+    --parameters '-p1 "foo bar" -e1 "moo mar"'
+
+./test-unit.sh \
+    --name "template without short name" \
+    --expected-result "hello --par1 foo -p3 muh --env1 bar" \
+    --parameters "-p1 foo -p3 muh -e1 bar"
+
+./test-unit.sh \
+    --name "template without short name tries to be bool" \
+    --expected-result "[ERROR] Aborting. Value of -p3 is -e1, which is a parameter, too." \
+    --parameters "-p1 foo -p3 -e1 bar"
