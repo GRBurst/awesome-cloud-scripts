@@ -30,7 +30,7 @@ _print_debug_success() (
 )
 
 _print_var_usage() (
-    printf '\n%4s | %-30s # %s %s' "$1" "$2" "$3" "$4"
+    printf "\n  %-${5}s | %-${6}s \t# %s %s" "$1" "$2" "$3" "$4"
 )
 _print_section_usage() (
     if [[ -n "${2:-}" ]]; then 
@@ -68,18 +68,54 @@ _generate_usage() (
     local _generate_usage_required_env
     local _generate_usage_optional_env
 
+    local -i _arg_length=0 _short_length=0
+    for var in "${!_generate_usage_rows[@]}"; do
+        local _short="${_generate_usage_options["$var",short]:-}"
+        local _arg="${_generate_usage_options["$var",arg]:-}"
+        if (( ${#_short} > _short_length )); then
+            (( _short_length=${#_short} ))
+        fi
+        if (( ${#_arg} > _arg_length )); then
+            (( _arg_length=${#_arg} ))
+        fi
+    done
+
     for var in "${!_generate_usage_rows[@]}"; do
         if [[ -n "${_generate_usage_options[$var,value]+unset}" ]]; then
             if [[ "${_generate_usage_options[$var,required]}" == "true" ]]; then
-                _generate_usage_required_env+="$(_print_var_usage "${_generate_usage_options[$var,short]:-}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "variable or argument")"
+                _generate_usage_required_env+="$(\
+                    _print_var_usage \
+                    "${_generate_usage_options[$var,short]:-}" \
+                    "${_generate_usage_options[$var,arg]}" \
+                    "${_generate_usage_options[$var,name]}" \
+                    "variable or argument" \
+                    $_short_length $_arg_length)"
             else
-                _generate_usage_optional_env+="$(_print_var_usage "${_generate_usage_options[$var,short]:-}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "variable or argument")"
+                _generate_usage_optional_env+="$(\
+                    _print_var_usage \
+                    "${_generate_usage_options[$var,short]:-}" \
+                    "${_generate_usage_options[$var,arg]}" \
+                    "${_generate_usage_options[$var,name]}" \
+                    "variable or argument" \
+                    $_short_length $_arg_length)"
             fi
         else
             if [[ "${_generate_usage_options[$var,required]}" == "true" ]]; then
-                _generate_usage_required+="$(_print_var_usage "${_generate_usage_options[$var,short]:-}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "argument")"
+                _generate_usage_required+="$(\
+                    _print_var_usage \
+                    "${_generate_usage_options[$var,short]:-}" \
+                    "${_generate_usage_options[$var,arg]}" \
+                    "${_generate_usage_options[$var,name]}" \
+                    "argument" \
+                    $_short_length $_arg_length)"
             else
-                _generate_usage_optional+="$(_print_var_usage "${_generate_usage_options[$var,short]:-}" "${_generate_usage_options[$var,arg]}" "${_generate_usage_options[$var,name]}" "argument")"
+                _generate_usage_optional+="$(\
+                    _print_var_usage \
+                    "${_generate_usage_options[$var,short]:-}" \
+                    "${_generate_usage_options[$var,arg]}" \
+                    "${_generate_usage_options[$var,name]}" \
+                    "argument" \
+                    $_short_length $_arg_length)"
             fi
         fi
     done
