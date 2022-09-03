@@ -38,7 +38,7 @@ Usage and Examples
     $script_name
 
 
-$(io::generate_usage options)
+$(cook::usage options)
 USAGE
 )
 
@@ -53,7 +53,7 @@ run() (
     # aws sts get-caller-identity "${p_params[@]}"
 
     # Or access a dedicated arg string (don't quote subshell)
-    aws sts get-caller-identity $(args::get_str p)
+    aws sts get-caller-identity $(cook::get_str p)
 
     # Or store the arg string in a variable before
     # local p="$(get_args_str p)"
@@ -70,13 +70,11 @@ self() (
     declare -a args=( "$@" )
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    elif (check::requirements options args); then
+    elif (cook::check_requirements options args); then
 
-        process_args options args params || io::print_debug "Couldn't process args, terminated with $?"
+        cook::process options args params
 
         run
-    else
-        io::print_debug "Requirements not met"
     fi
 
 )

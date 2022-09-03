@@ -20,14 +20,41 @@ if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
     exit 1
 fi
 
-process_args() {
-    local -n process_options="$1"
-    local -n process_args="$2"
-    local -n process_params="$3"
-
-    args::configure process_options process_args || io::print_debug "configure terminated with $?"
-    args::translate process_options              || io::print_debug "translate terminated with $?"
-    args::get       process_params               || io::print_debug "get_args terminated with $?"
+cook::usage() {
+    local -rn cook_usage_options="$1"
+    io::generate_usage cook_usage_options
+}
+cook::check_requirements() {
+    local -n cook_check_requirements_options="$1"
+    local -n cook_check_requirements_arg="$2"
+    check::requirements cook_check_requirements_options cook_check_requirements_arg
+}
+cook::process() {
+    local -n script_cook_options="$1"
+    local -n script_cook_args="$2"
+    local -n script_cook_params="$3"
+    args::process script_cook_options script_cook_args script_cook_params
+}
+cook::get() {
+    local -n cook_get_options="$1"
+    local cook_get_arg="${2:-}"
+    args::get cook_get_options cook_get_arg
+}
+cook::get_str() {
+    args::get_str "$1"
+}
+cook::get_values() {
+    local -n cook_get_values_options="$1"
+    local cook_get_values_arg="${2:-}"
+    args::get_values cook_get_values_options cook_get_values_arg
+}
+cook::get_values_str() {
+    args::get_values_str "$1"
+}
+cook::array_from_str() {
+    local -n cook_array_from_str_array="$1"
+    local cook_array_from_str_str="$2"
+    common::get_array_from_str cook_array_from_str_array "$cook_array_from_str_str"
 }
 
 cleanup() (

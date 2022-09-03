@@ -55,7 +55,7 @@ Usage and Examples
     $script_name
 
 
-$(io::generate_usage options)
+$(cook::usage options)
 USAGE
 )
 
@@ -71,10 +71,10 @@ run() (
 
     # Access a dedicated variable by using get_args yourself
     local -a p1_params
-    args::get p1_params "p1"
+    cook::get p1_params "p1"
     hello -g "hello ${p1_params[*]}"
 
-    hello -g "hello $(args::get_str p1)"
+    hello -g "hello $(cook::get_str p1)"
 
     # Or use all the parameter with the defined array params
     hello -g "hello ${params[*]}"
@@ -91,13 +91,11 @@ self() (
     declare -a args=( "$@" )
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    elif (check::requirements options args); then
+    elif (cook::check_requirements options args); then
 
-        process_args options args params || io::print_debug "Couldn't process args, terminated with $?"
+        cook::process options args params
 
         run
-    else
-        io::print_debug "Requirements not met"
     fi
 
 )

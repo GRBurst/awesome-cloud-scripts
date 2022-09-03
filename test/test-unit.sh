@@ -35,7 +35,7 @@ Usage and Examples
     --parameters "-p1 foo -e1 bar"
 
 
-$(_generate_usage options)
+$(cook::usage options)
 USAGE
 )
 
@@ -47,12 +47,12 @@ run() (
     success()   ( echo -e "\e[32m[SUCCESS] $1 succeeded\e[0m" )
 
     local name msg pars
-    name="$(args::get_values_str n)"
-    msg="$(args::get_values_str e)"
-    pars="$(args::get_values_str p)"
- 
+    name="$(cook::get_values_str n)"
+    msg="$(cook::get_values_str e)"
+    pars="$(cook::get_values_str p)"
+
     local -a parameter_args
-    common::get_array_from_str parameter_args "$pars"
+    cook::array_from_str parameter_args "$pars"
 
     [[ "$($script_path/../templates/template.sh "${parameter_args[@]}" 2>&1 | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
 )
@@ -63,13 +63,11 @@ self() (
     declare -a args=( "$@" )
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    elif (check::requirements options args); then
+    elif (cook::check_requirements options args); then
 
-        process_args options args params || io::print_debug "Couldn't process args, terminated with $?"
+        cook::process options args params
 
         run
-    else
-        io::print_debug "Requirements not met"
     fi
 
 )

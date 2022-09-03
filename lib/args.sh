@@ -138,3 +138,12 @@ args::get_values_str() {
     echo "${_get_values_str_res[@]}"
 }
 
+args::process() {
+    local -n process_options="$1"
+    local -n process_args="$2"
+    local -n process_params="$3"
+
+    args::configure process_options process_args || io::print_debug "configure terminated with $?"
+    args::translate process_options              || io::print_debug "translate terminated with $?"
+    args::get       process_params               || io::print_debug "get_args terminated with $?"
+}
