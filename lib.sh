@@ -6,8 +6,8 @@ if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
     exit 1
 fi
 
-trap 'cleanup $? $LINENO' ERR
-cleanup() ( >&2 echo "Error: (${1:-}) occurred on line ${2:-}" )
+cleanup() ( >&2 echo "Error: (${1:-}) occurred on line ${2:-} in ${3:-}" )
+trap 'cleanup $? $LINENO ${BASH_SOURCE##*/}' ERR
 
 declare -A _lib_params_assoc
 declare -a _lib_params_order
@@ -462,7 +462,6 @@ get_args() {
                 _get_args_res+=( "${_lib_params_assoc[$key]}" )
             fi
         done
-
     fi
 }
 
@@ -496,7 +495,7 @@ get_array_from_str() {
     local -n _get_array_from_str_arr="$1"
     local _get_array_from_str_var="$2"
 
-    declare -a "_get_array_from_str_tmp=( $_get_array_from_str_var )"
+    declare -a "_get_array_from_str_tmp=( $(echo "$_get_array_from_str_var" | sed -e 's#(#\\(#g' -e 's#)#\\)#g') )"
     _get_array_from_str_arr=("${_get_array_from_str_tmp[@]}")
 }
 
