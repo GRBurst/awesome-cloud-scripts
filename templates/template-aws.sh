@@ -1,14 +1,14 @@
 #! /usr/bin/env nix-shell
 #! nix-shell -i bash
 #! nix-shell -p awscli2 aws-vault
-##! nix-shell --pure
-##! nix-shell --keep AWS_PROFILE --keep DEBUG
-# remove one # for the 2 shebangs above during devlopment of the script.
+#! nix-shell --pure
+#! nix-shell --keep AWS_PROFILE --keep DEBUG
+# add '#' for the 2 shebangs above after finishing development of the script.
 
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail
 set -Eeuo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/script-cook.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../script-cook.sh"
 
 # This will contain the resulting parameters of your command
 declare -a params

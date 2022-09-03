@@ -1,12 +1,13 @@
 #! /usr/bin/env nix-shell
 #! nix-shell -i bash
+#! nix-shell -p hello
 #! nix-shell --pure
 #! nix-shell --keep ENV1 --keep ENV2 --keep DEBUG
-#! nix-shell -p hello
+# add '#' for the 2 shebangs above after finishing development of the script.
 
 set -Eeuo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/script-cook.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../script-cook.sh"
 
 # This will contain the resulting parameters of your command
 declare -a params

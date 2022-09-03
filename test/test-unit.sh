@@ -54,7 +54,7 @@ run() (
     local -a parameter_args
     common::get_array_from_str parameter_args "$pars"
 
-    [[ "$($script_path/../template.sh "${parameter_args[@]}" 2>&1 | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
+    [[ "$($script_path/../templates/template.sh "${parameter_args[@]}" 2>&1 | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
 )
 
 
