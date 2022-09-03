@@ -8,7 +8,7 @@
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail
 set -Eeuo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/script-cook.sh"
 
 # This will contain the resulting parameters of your command
 declare -a params

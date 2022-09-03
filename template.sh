@@ -4,10 +4,9 @@
 #! nix-shell --keep ENV1 --keep ENV2 --keep DEBUG
 #! nix-shell -p hello
 
-# https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail
 set -Eeuo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/script-cook.sh"
 
 # This will contain the resulting parameters of your command
 declare -a params
@@ -55,7 +54,7 @@ Usage and Examples
     $script_name
 
 
-$(_generate_usage options)
+$(io::generate_usage options)
 USAGE
 )
 
@@ -71,10 +70,10 @@ run() (
 
     # Access a dedicated variable by using get_args yourself
     local -a p1_params
-    get_args p1_params "p1"
+    args::get p1_params "p1"
     hello -g "hello ${p1_params[*]}"
 
-    hello -g "hello $(get_args_str p1)"
+    hello -g "hello $(args::get_str p1)"
 
     # Or use all the parameter with the defined array params
     hello -g "hello ${params[*]}"
@@ -91,13 +90,13 @@ self() (
     declare -a args=( "$@" )
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    elif (check_requirements options args); then
+    elif (check::requirements options args); then
 
-        process_args options args params || _print_debug "Couldn't process args, terminated with $?"
+        process_args options args params || io::print_debug "Couldn't process args, terminated with $?"
 
         run
     else
-        _print_debug "Requirements not met"
+        io::print_debug "Requirements not met"
     fi
 
 )
