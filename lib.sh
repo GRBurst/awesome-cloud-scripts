@@ -146,9 +146,6 @@ _print_option_matrix() (
     _get_keys_matrix _print_option_matrix_options _print_option_matrix_rows _print_option_matrix_cols
 
 
-    # local _red_color="$(tput setaf 1)"
-    # local _normal_color="$(tput sgr0)"
-    # echo -e "\e[31m[ERROR] ${_print_error_msg}\e[0m"
     local _var_length=0
     for var in "${!_print_option_matrix_rows[@]}"; do
         if (( ${#var} > _var_length )); then 
@@ -162,7 +159,6 @@ _print_option_matrix() (
             if [[ -z "${_print_option_matrix_options[$var,$arg]+unset}" ]]; then
                 printf "%${_cell_length}s" "   "
             elif [[ "${_print_option_matrix_err_vars[*]}" =~ "$var" ]]; then
-                # printf '%14s | ' "${_red_color}[$var,$arg]${_normal_color}"
                 printf "\e[1m\e[31m%${_cell_length}s\e[0m" "[$var,$arg]"
             else
                 printf "%${_cell_length}s" "[$var,$arg]"
