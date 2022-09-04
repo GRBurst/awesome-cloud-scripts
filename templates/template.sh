@@ -20,7 +20,7 @@ declare -a params
 # Configure your variables and parameters here.
 # We destinguish between variables and attributes and interprete the key of as 2-dim arrays.
 #   -> In our case: e1, e2, p1, p2 and b are our variables
-#   -> In our case: arg, value, short, required, name, type and pos are our attributes
+#   -> In our case: arg, value, short, required, name, tpe and pos are our attributes
 # The scritp assumes the 2-dim array keys to be separated by a comme (,).
 # Variables are checked by searching all arguments for the representing arg or its short version.
 #   -> In our case: To check e1, we search for --env1 or -e1, because we defined the 
@@ -33,11 +33,11 @@ declare -a params
 #   -> In our case: [p1,value], [p2,value] and [b,value] are not defined in the array
 declare -A options=(
     [e1,arg]="--env1" [e1,value]="${ENV1:-}" [e1,short]="-e1" [e1,required]=true  [e1,name]="ENV1"
-    [e2,arg]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2" [e2,required]=false [e2,name]="ENV2"
+    [e2,arg]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2"                     [e2,name]="ENV2" [e2,required]=false
     [p1,arg]="--par1"                        [p1,short]="-p1" [p1,required]=true  [p1,name]="PAR1"
-    [p2,arg]="--par2"                        [p2,short]="-p2" [p2,required]=false [p2,name]="PAR2"       [p2,pos]=2
-    [p3,arg]="-p3"                                            [p3,required]=false [p3,name]="PAR1"
-    [b,arg]="--bool"                         [b,short]="-b"   [b,required]=false  [b,name]="Bool Switch" [b,tpe]="bool"
+    [p2,arg]="--par2"                        [p2,short]="-p2"                     [p2,name]="PAR2"       [p2,pos]=2 [p2,required]=false
+    [p3,arg]="-p3"                                                                [p3,name]="PAR1" [p3,required]=false
+    [b,arg]="--bool"                         [b,short]="-b"                       [b,name]="Bool Switch" [b,tpe]="bool" [b,required]=false
 )
 
 # Define your usage and help message here
@@ -94,7 +94,6 @@ self() (
     elif (cook::check options args); then
 
         cook::process options args params
-
         run
     fi
 

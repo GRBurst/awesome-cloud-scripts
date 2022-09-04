@@ -10,6 +10,7 @@ if [[ "${SCRIPT_COOK_IO_LOADED:-}" != "true" ]]; then
     source "$(dirname "${BASH_SOURCE[0]}")/io.sh"
 fi
 
+declare -rA args_defaults=( [required]=false [pos]=1 [tpe]="named" )
 declare -A _lib_params_assoc
 declare -a _lib_params_order
 
@@ -27,6 +28,20 @@ args::assign() {
         io::print_error "Missing value for ${_assign_args[$2,name]}"
         return 1
     fi
+}
+
+args::fill_default() {
+    local -n fill_default_options_ref="$1"
+    local var="$2"
+    for arg in required pos tpe; do
+        if [[ -z "${fill_default_options_ref[$var,$arg]:+set}" ]]; then
+            fill_default_options_ref+=( [$var,$arg]="${args_defaults[$arg]}" )
+        fi
+    done
+    if [[ -z "${fill_default_options_ref[$var,name]:+set}" ]]; then
+        fill_default_options_ref+=( [$var,name]="${fill_default_options_ref[$var,arg]}" )
+    fi
+
 }
 
 args::configure() {
@@ -51,9 +66,11 @@ args::configure() {
         local var
         var="$(common::get_variable_from_param _configure_options "$user_argument")"
 
+        args::fill_default _configure_options "$var"
+
         if [[ "${_configure_options[$var,tpe]:-}" == "bool" ]]; then
-            args::assign _configure_options "$var" "true"
-            ((i++))
+                args::assign _configure_options "$var" "true"
+                ((i++))
         else
             local user_arg_pos=${_configure_options[$var,pos]:-1}
             local -i j=1

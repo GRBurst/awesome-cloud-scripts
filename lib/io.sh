@@ -42,17 +42,17 @@ io::print_section_usage() (
 )
 
 io::generate_usage() (
-    local -rn options="$1"
+    local -rn genenrate_usage_options_ref="$1"
     local -A rows cols
 
-    common::get_keys_matrix options rows cols
+    common::get_keys_matrix genenrate_usage_options_ref rows cols
 
     local required optional required_env optional_env
     local -i arg_length=0 short_length=0
 
     for var in "${!rows[@]}"; do
-        local short="${options[$var,short]:-}"
-        local arg="${options[$var,arg]:-}"
+        local short="${genenrate_usage_options_ref[$var,short]:-}"
+        local arg="${genenrate_usage_options_ref[$var,arg]:-}"
         if (( ${#short} > short_length )); then
             (( short_length=${#short} ))
         fi
@@ -62,39 +62,39 @@ io::generate_usage() (
     done
 
     for var in "${!rows[@]}"; do
-        if [[ -n "${options[$var,value]+unset}" ]]; then
-            if [[ "${options[$var,required]}" == "true" ]]; then
+        if [[ -n "${genenrate_usage_options_ref[$var,value]+unset}" ]]; then
+            if [[ "${genenrate_usage_options_ref[$var,required]}" == "true" ]]; then
                 required_env+="$(\
                     io::print_var_usage \
-                    "${options[$var,short]:-}" \
-                    "${options[$var,arg]}" \
-                    "${options[$var,name]}" \
+                    "${genenrate_usage_options_ref[$var,short]:-}" \
+                    "${genenrate_usage_options_ref[$var,arg]}" \
+                    "${genenrate_usage_options_ref[$var,name]}" \
                     "variable or argument" \
                     $short_length $arg_length)"
             else
                 optional_env+="$(\
                     io::print_var_usage \
-                    "${options[$var,short]:-}" \
-                    "${options[$var,arg]}" \
-                    "${options[$var,name]}" \
+                    "${genenrate_usage_options_ref[$var,short]:-}" \
+                    "${genenrate_usage_options_ref[$var,arg]}" \
+                    "${genenrate_usage_options_ref[$var,name]}" \
                     "variable or argument" \
                     $short_length $arg_length)"
             fi
         else
-            if [[ "${options[$var,required]}" == "true" ]]; then
+            if [[ "${genenrate_usage_options_ref[$var,required]}" == "true" ]]; then
                 required+="$(\
                     io::print_var_usage \
-                    "${options[$var,short]:-}" \
-                    "${options[$var,arg]}" \
-                    "${options[$var,name]}" \
+                    "${genenrate_usage_options_ref[$var,short]:-}" \
+                    "${genenrate_usage_options_ref[$var,arg]}" \
+                    "${genenrate_usage_options_ref[$var,name]}" \
                     "argument" \
                     $short_length $arg_length)"
             else
                 optional+="$(\
                     io::print_var_usage \
-                    "${options[$var,short]:-}" \
-                    "${options[$var,arg]}" \
-                    "${options[$var,name]}" \
+                    "${genenrate_usage_options_ref[$var,short]:-}" \
+                    "${genenrate_usage_options_ref[$var,arg]}" \
+                    "${genenrate_usage_options_ref[$var,name]}" \
                     "argument" \
                     $short_length $arg_length)"
             fi
@@ -118,15 +118,15 @@ USAGE
 )
 
 io::print_option_matrix() (
-    local -rn options="$1"
-    local -rn err_vars="$2"
+    local -rn print_option_matrix_options_ref="$1"
+    local -rn print_option_matrix_error_vars_ref="$2"
 
     local -A rows cols
 
-    common::get_keys_matrix options rows cols
+    common::get_keys_matrix print_option_matrix_options_ref rows cols
 
 
-    local var_length=0
+    local -i var_length=0
     for var in "${!rows[@]}"; do
         if (( ${#var} > var_length )); then 
             var_length=${#var}
@@ -135,11 +135,11 @@ io::print_option_matrix() (
 
     for var in "${!rows[@]}"; do
         for arg in "${!cols[@]}"; do
-            local cell_length=0
+            local -i cell_length=0
             (( cell_length=${var_length}+${#arg}+3 ))
-            if [[ -z "${options[$var,$arg]+unset}" ]]; then
+            if [[ -z "${print_option_matrix_options_ref[$var,$arg]+unset}" ]]; then
                 printf "%${cell_length}s" "   "
-            elif [[ "${err_vars[*]}" =~ "$var" ]]; then
+            elif [[ "${print_option_matrix_error_vars_ref[*]}" =~ "$var" ]]; then
                 printf "\e[1m\e[31m%${cell_length}s\e[0m" "[$var,$arg]"
             else
                 printf "%${cell_length}s" "[$var,$arg]"
@@ -147,6 +147,52 @@ io::print_option_matrix() (
             printf " | "
         done
         echo ""
+    done
+
+)
+
+io::print_values_matrix() (
+    local -rn print_values_matrix_options_ref="$1"
+
+    local -A rows cols
+
+    common::get_keys_matrix print_values_matrix_options_ref rows cols
+
+    local -A cols_length
+    for arg in "${!cols[@]}"; do
+        for var in "${!rows[@]}"; do
+            local val="${print_values_matrix_options_ref[$var,$arg]:-}"
+            local -i length="${cols_length[$arg]:-0}"
+            if (( "${#val}" > length )); then 
+                cols_length+=( [$arg]=${#val} )
+            fi
+        done
+    done
+
+    local -i total_length=0
+    for arg in "${!cols[@]}"; do
+        if (( "${#arg}" > "${cols_length[$arg]}" )); then 
+            cols_length+=( [$arg]=${#arg} )
+        fi
+        printf "%${cols_length[$arg]}s" "$arg"
+        printf " | "
+        (( total_length+=${cols_length[$arg]}+3 ))
+    done
+
+    printf "\n"
+    printf '%0.s-' $(seq 2 $total_length)
+    printf "\n"
+
+    for var in "${!rows[@]}"; do
+        for arg in "${!cols[@]}"; do
+            if [[ -z "${print_values_matrix_options_ref[$var,$arg]+unset}" ]]; then
+                printf "%${cols_length[$arg]}s" " "
+            else
+                printf "%${cols_length[$arg]}s" "${print_values_matrix_options_ref[$var,$arg]:-}"
+            fi
+            printf " | "
+        done
+        printf "\n"
     done
 
 )
