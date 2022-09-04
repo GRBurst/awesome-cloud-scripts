@@ -70,7 +70,7 @@ self() (
     declare -a args=( "$@" )
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    elif (cook::check_requirements options args); then
+    elif (cook::check options args); then
 
         cook::process options args params
 

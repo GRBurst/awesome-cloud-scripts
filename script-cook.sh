@@ -24,7 +24,7 @@ cook::usage() {
     local -rn cook_usage_options="$1"
     io::generate_usage cook_usage_options
 }
-cook::check_requirements() {
+cook::check() {
     local -n cook_check_requirements_options="$1"
     local -n cook_check_requirements_arg="$2"
     check::requirements cook_check_requirements_options cook_check_requirements_arg
