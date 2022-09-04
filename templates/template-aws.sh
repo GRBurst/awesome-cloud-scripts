@@ -20,7 +20,7 @@ declare -a params
 
 # Configure your parameters here
 declare -A options=(
-    [p,arg]="--profile" [p,value]="${AWS_PROFILE:-}" [p,short]="-p" [p,required]=true [p,name]="aws profile"
+    [p,arg]="--profile" [p,value]="${AWS_PROFILE:-}" [p,short]="-p" [p,required]=true [p,desc]="aws profile"
 )
 
 # Define your usage and help message here

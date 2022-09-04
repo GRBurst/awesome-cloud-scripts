@@ -26,6 +26,15 @@ If you don’t have `nix-shell` on your system, you have to take care of the nee
 bash ./template.sh
 ```
 
+## Namings and Argument Definition
+
+| type (tpe) | can be optional? | arity | description                                   |
+| ---------- | ---------------- | ----- | --------------------------------------------- |
+| named      | yes              | n     | named parameter, e.g. --name <myvalue>        |
+| anonym     | no               | 1     | unamed parameter                              |
+| flag       | always           | 0     | single flag to toggle options, e.g. --my-bool |
+| multi      | yes              | n     | only at the end and only allowed once         |
+
 # Related
 
 This project was created in companion with [nix-cloud-scripts](https://github.com/GRBurst/nix-cloud-scripts), a collection of scripts to ease your work with cloud environments.

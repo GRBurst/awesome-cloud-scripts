@@ -10,7 +10,7 @@ if [[ "${SCRIPT_COOK_IO_LOADED:-}" != "true" ]]; then
     source "$(dirname "${BASH_SOURCE[0]}")/io.sh"
 fi
 
-declare -rA args_defaults=( [required]=false [pos]=1 [tpe]="named" )
+declare -rA args_defaults=( [required]=false [arity]=1 [tpe]="named" )
 declare -A _lib_params_assoc
 declare -a _lib_params_order
 
@@ -18,14 +18,14 @@ args::assign() {
     local -n _assign_args="$1"
 
     if [[ -n "${3:-}" ]]; then
-        if [[ -n "${_assign_args["$2",value]:+unset}" ]] && (( "${_assign_args["$2",pos]:-1}" > 1)); then
+        if [[ -n "${_assign_args["$2",value]:+set}" ]] && (( "${_assign_args["$2",arity]:-1}" > 1)); then
             _assign_args+=( ["$2,value"]+=" $3" )
         else
             _assign_args["$2,value"]="$3"
         fi
         return 0
     else
-        io::print_error "Missing value for ${_assign_args[$2,name]}"
+        io::print_error "Missing value for ${_assign_args[$2,desc]}"
         return 1
     fi
 }
@@ -33,13 +33,13 @@ args::assign() {
 args::fill_default() {
     local -n fill_default_options_ref="$1"
     local var="$2"
-    for arg in required pos tpe; do
+    for arg in required arity tpe; do
         if [[ -z "${fill_default_options_ref[$var,$arg]:+set}" ]]; then
             fill_default_options_ref+=( [$var,$arg]="${args_defaults[$arg]}" )
         fi
     done
-    if [[ -z "${fill_default_options_ref[$var,name]:+set}" ]]; then
-        fill_default_options_ref+=( [$var,name]="${fill_default_options_ref[$var,arg]}" )
+    if [[ -z "${fill_default_options_ref[$var,desc]:+set}" ]]; then
+        fill_default_options_ref+=( [$var,desc]="${fill_default_options_ref[$var,arg]}" )
     fi
 
 }
@@ -62,7 +62,7 @@ args::configure() {
         local user_argument="${_configure_args[$i]}"
         io::print_debug "configure user_argument[$i] = $user_argument"
 
-        # Get current variable name for parameter
+        # Get current variable for parameter
         local var
         var="$(common::get_variable_from_param _configure_options "$user_argument")"
 
@@ -72,14 +72,14 @@ args::configure() {
                 args::assign _configure_options "$var" "true"
                 ((i++))
         else
-            local user_arg_pos=${_configure_options[$var,pos]:-1}
+            local user_arg_arity=${_configure_options[$var,arity]:-1}
             local -i j=1
-            while ((j <= user_arg_pos)); do
+            while ((j <= user_arg_arity)); do
                 io::print_debug "args::assign _configure_options $var ${_configure_args[$((i+j))]:-}"
                 args::assign _configure_options "$var" "${_configure_args[$((i+j))]:-}"
                 ((j++))
             done
-            (( i=i+user_arg_pos+1 ))
+            (( i=i+user_arg_arity+1 ))
         fi
     done
 }
@@ -87,7 +87,7 @@ args::configure() {
 args::translate() {
     local -n _translate_args="$1"
 
-    if [[ -n "${1:+unset}" ]]; then
+    if [[ -n "${1:+set}" ]]; then
         local -A _translate_rows
 
         for key in "${!_translate_args[@]}"; do
@@ -96,7 +96,7 @@ args::translate() {
         done
 
         for var in "${!_translate_rows[@]}"; do
-            if [[ -n "${_translate_args[$var,value]:+unset}" ]]; then
+            if [[ -n "${_translate_args[$var,value]:+set}" ]]; then
                 # value is set and not empty
                 local _translate_args_param_arg_key="$var,arg"
                 local _translate_args_param_val_key="$var,value"

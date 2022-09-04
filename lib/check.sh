@@ -18,17 +18,17 @@ check::declaration() (
     common::get_keys_matrix declare_options rows cols
 
     for var in "${!rows[@]}"; do
-        if [[ -z "${declare_options[$var,arg]:+unset}" ]]; then
+        if [[ -z "${declare_options[$var,arg]:+set}" ]]; then
             io::print_error "[$var,arg] missing. Please provide a (long) argument by adding [$var,arg] to your declare_options."
             error_vars+=( "$var" )
         fi
 
-        if [[ -z "${declare_options[$var,required]:+unset}" ]]; then
+        if [[ -z "${declare_options[$var,required]:+set}" ]]; then
             io::print_error "[$var,required] missing. Please define the required argument by adding [$var,required] to your declare_options."
             error_vars+=( "$var" )
         fi
     done
-    if [[ -n "${error_vars:+unset}" ]]; then
+    if [[ -n "${error_vars:+set}" ]]; then
         io::print_error "Found ${#error_vars} errors"
         _print_option_matrix declare_options error_vars
         exit 1
@@ -59,11 +59,11 @@ check::param_with_env() (
     local -rn with_env_args="$2"
     local var="$3"
 
-    io::print_debug "${with_env_options[$var,name]} is required, checking if provided."
+    io::print_debug "${with_env_options[$var,desc]} is required, checking if provided."
 
-    if [[ -n "${with_env_options[$var,value]:+unset}" ]] && [[ -n "${with_env_options[$var,value]}" ]]; then
+    if [[ -n "${with_env_options[$var,value]:+set}" ]] && [[ -n "${with_env_options[$var,value]}" ]]; then
         # value is required and provided as environment variable
-        io::print_debug "${with_env_options[$var,name]} provided via environment variable."
+        io::print_debug "${with_env_options[$var,desc]} provided via environment variable."
         return 0
     fi
 
@@ -72,12 +72,12 @@ check::param_with_env() (
         io::print_debug "$var provided via parameter."
         return 0
     else
-        if [[ -z "${with_env_options[$var,value]:+unset}" ]]; then
+        if [[ -z "${with_env_options[$var,value]:+set}" ]]; then
             # value can only be provided as parameter (value not defined), but the parameter is not provided
-            io::print_error "${with_env_options[$var,name]} parameter required but not provided."
+            io::print_error "${with_env_options[$var,desc]} parameter required but not provided."
         else
             # value can be provided as environment variable or parameter (value is defined but empty), but the parameter is not provided in either way
-            io::print_error "${with_env_options[$var,name]} environment variable or parameter required but not provided."
+            io::print_error "${with_env_options[$var,desc]} environment variable or parameter required but not provided."
         fi
     fi
     return 1
@@ -99,7 +99,7 @@ check::requirements() {
     # No sanity or value check here, we only check if all parameters are provided
     for var in "${!rows[@]}"; do
         if [[ "${req_options[$var,required]:-}" != "true" ]]; then 
-            io::print_debug "${req_options[$var,name]:-} not required, skipping"
+            io::print_debug "${req_options[$var,desc]:-} not required, skipping"
             continue
         fi
         check::param_with_env req_options req_args "$var" || return 1
@@ -125,7 +125,7 @@ check::requirements() {
         local user_argument="${req_args[$i]}"
         io::print_debug "checking user_argument[$i] = $user_argument"
 
-        # Get current variable name for parameter
+        # Get current variable for parameter
         local var
         var="$(common::get_variable_from_param req_options "$user_argument")"
 
@@ -140,7 +140,7 @@ check::requirements() {
 
         # If the variable is has a type set and the type is boolean (tpe == bool),
         # we don't have to check the argument and continue
-        if [[ -n "${req_options[$var,tpe]:+unset}" ]] \
+        if [[ -n "${req_options[$var,tpe]:+set}" ]] \
             && [[ "${req_options[$var,tpe]:-}" == "bool" ]]; then
             req_options+=( ["$var",_checked]="true" )
             io::print_debug "  |$user_argument is boolean, skipping further checks"
@@ -148,22 +148,22 @@ check::requirements() {
             continue
         fi
 
-        # Now we check if the parameter got n arguments (pos), these are not a parameter itself,
+        # Now we check if the parameter got n arguments (arity), these are not a parameter itself,
         # unless the are provided again as a parameter after n arguments
-        # Default number of positions is n=1.
-        local user_arg_pos=${req_options[$var,pos]:-1}
+        # Default arity is n=1.
+        local user_arg_arity=${req_options[$var,arity]:-1}
 
         # Separate check if the last argument is a parameter but no value is provided
-        if (( i+user_arg_pos  >= total_args_length )); then
-            io::print_error "Aborting. Not enough values provided for last parameter ${req_options[$var,name]}."
+        if (( i+user_arg_arity  >= total_args_length )); then
+            io::print_error "Aborting. Not enough values provided for last parameter ${req_options[$var,desc]}."
             return 1
         fi
 
         local j=$((i+1))
         # Search all following arguments for valid values
-        while (( j <= i+user_arg_pos )); do
-            if [[ -z "${req_args[$j]:+unset}" ]]; then
-                io::print_error "Aborting. Not enough values provided for parameter ${req_options[$var,name]}."
+        while (( j <= i+user_arg_arity )); do
+            if [[ -z "${req_args[$j]:+set}" ]]; then
+                io::print_error "Aborting. Not enough values provided for parameter ${req_options[$var,desc]}."
                 return 1
             fi
             local next_user_argument="${req_args[$j]}"
@@ -190,7 +190,7 @@ check::requirements() {
 
                 # Now, only if the parameter is provided again in the arguments, it can still be a valid
                 # argument list and hence a valid command.
-                local -i k=$((i+user_arg_pos+1))
+                local -i k=$((i+user_arg_arity+1))
                 while (( k < total_args_length )); do # args provided by user
                     if [[ "$(common::get_variable_from_param req_options "$next_user_argument")" == "$(common::get_variable_from_param req_options "${req_args[$k]}")" ]]; then
                         io::print_debug "        |[$j]$next_user_argument is provided again later in the args[$k]"
@@ -200,7 +200,7 @@ check::requirements() {
                     ((k++))
                 done
 
-                io::print_error "Aborting. Value of $user_argument is $next_user_argument, which is a parameter, too. However, we couldn't find another $next_user_argument, so it seems like not enough argument are provided. The parameter $user_argument needs $user_arg_pos parameter(s)."
+                io::print_error "Aborting. Value of $user_argument is $next_user_argument, which is a parameter, too. However, we couldn't find another $next_user_argument, so it seems like not enough argument are provided. The parameter $user_argument needs $user_arg_arity parameter(s)."
                 return 1
 
             done
@@ -213,7 +213,7 @@ check::requirements() {
         io::print_debug_success "successfully checked $var($user_argument)"
         req_options+=( ["$var",_checked]="true" )
         io::print_debug "|next parameter"
-        ((i=i+user_arg_pos+1))
+        ((i=i+user_arg_arity+1))
     done
 
     return 0

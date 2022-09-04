@@ -10,10 +10,10 @@ common::get_keys_matrix() {
     # We create two arrays for the rows and column keys that doesn't contain duplicates
     for var in "${!_get_keys_matrix_assoc[@]}"; do
         IFS=',' read -ra _key_arr <<< "${var}"
-        if [[ -n "${_key_arr[0]+unset}" ]]; then
+        if [[ -n "${_key_arr[0]+set}" ]]; then
             _get_keys_matrix_rows["${_key_arr[0]}"]=1
         fi
-        if [[ -n "${_key_arr[1]+unset}" ]]; then
+        if [[ -n "${_key_arr[1]+set}" ]]; then
             _get_keys_matrix_cols["${_key_arr[1]}"]=1
         fi
     done

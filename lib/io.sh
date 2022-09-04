@@ -62,13 +62,13 @@ io::generate_usage() (
     done
 
     for var in "${!rows[@]}"; do
-        if [[ -n "${genenrate_usage_options_ref[$var,value]+unset}" ]]; then
+        if [[ -n "${genenrate_usage_options_ref[$var,value]+set}" ]]; then
             if [[ "${genenrate_usage_options_ref[$var,required]}" == "true" ]]; then
                 required_env+="$(\
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
                     "${genenrate_usage_options_ref[$var,arg]}" \
-                    "${genenrate_usage_options_ref[$var,name]}" \
+                    "${genenrate_usage_options_ref[$var,desc]}" \
                     "variable or argument" \
                     $short_length $arg_length)"
             else
@@ -76,7 +76,7 @@ io::generate_usage() (
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
                     "${genenrate_usage_options_ref[$var,arg]}" \
-                    "${genenrate_usage_options_ref[$var,name]}" \
+                    "${genenrate_usage_options_ref[$var,desc]}" \
                     "variable or argument" \
                     $short_length $arg_length)"
             fi
@@ -86,7 +86,7 @@ io::generate_usage() (
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
                     "${genenrate_usage_options_ref[$var,arg]}" \
-                    "${genenrate_usage_options_ref[$var,name]}" \
+                    "${genenrate_usage_options_ref[$var,desc]}" \
                     "argument" \
                     $short_length $arg_length)"
             else
@@ -94,7 +94,7 @@ io::generate_usage() (
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
                     "${genenrate_usage_options_ref[$var,arg]}" \
-                    "${genenrate_usage_options_ref[$var,name]}" \
+                    "${genenrate_usage_options_ref[$var,desc]}" \
                     "argument" \
                     $short_length $arg_length)"
             fi
@@ -137,7 +137,7 @@ io::print_option_matrix() (
         for arg in "${!cols[@]}"; do
             local -i cell_length=0
             (( cell_length=${var_length}+${#arg}+3 ))
-            if [[ -z "${print_option_matrix_options_ref[$var,$arg]+unset}" ]]; then
+            if [[ -z "${print_option_matrix_options_ref[$var,$arg]+set}" ]]; then
                 printf "%${cell_length}s" "   "
             elif [[ "${print_option_matrix_error_vars_ref[*]}" =~ "$var" ]]; then
                 printf "\e[1m\e[31m%${cell_length}s\e[0m" "[$var,$arg]"
@@ -185,7 +185,7 @@ io::print_values_matrix() (
 
     for var in "${!rows[@]}"; do
         for arg in "${!cols[@]}"; do
-            if [[ -z "${print_values_matrix_options_ref[$var,$arg]+unset}" ]]; then
+            if [[ -z "${print_values_matrix_options_ref[$var,$arg]+set}" ]]; then
                 printf "%${cols_length[$arg]}s" " "
             else
                 printf "%${cols_length[$arg]}s" "${print_values_matrix_options_ref[$var,$arg]:-}"

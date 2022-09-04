@@ -6,9 +6,9 @@ declare script_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$script_path/../script-cook.sh"
 
 declare -A options=(
-    [n,arg]="--name"            [n,short]="-n" [n,required]=true  [n,name]="name"
-    [e,arg]="--expected-result" [e,short]="-e" [e,required]=true  [e,name]="result message"
-    [p,arg]="--parameters"      [p,short]="-p" [p,required]=false [p,name]="parameters"
+    [d,arg]="--desc"            [d,short]="-d" [d,required]=true  [d,desc]="description"
+    [e,arg]="--expected-result" [e,short]="-e" [e,required]=true  [e,desc]="result message"
+    [p,arg]="--parameters"      [p,short]="-p" [p,required]=false [p,desc]="parameters"
 )
 # This will contain the resulting parameters of your command
 declare -a params
@@ -25,12 +25,12 @@ Usage and Examples
 
 - Run the script without parameters:
     $script_name \\
-    --name "missing par1 par" \\
+    --desc "missing par1 par" \\
     --expected-result "[ERROR] PAR1 parameter required but not provided."
 
 - Run the script with all required parameters:
     $script_name \\
-    --name "template" \\
+    --desc "template" \\
     --expected-result "hello --par1 foo --env1 bar" \\
     --parameters "-p1 foo -e1 bar"
 
@@ -46,15 +46,15 @@ run() (
     fail()      ( echo -e "\e[31m[   FAIL] $1 failed\e[0m" )
     success()   ( echo -e "\e[32m[SUCCESS] $1 succeeded\e[0m" )
 
-    local name msg pars
-    name="$(cook::get_values_str n)"
+    local desc msg pars
+    desc="$(cook::get_values_str d)"
     msg="$(cook::get_values_str e)"
     pars="$(cook::get_values_str p)"
 
     local -a parameter_args
     cook::array_from_str parameter_args "$pars"
 
-    [[ "$($script_path/../templates/template.sh "${parameter_args[@]}" 2>&1 | tail -n 1)" == *"$msg"* ]] && success "$name" || fail "$name"
+    [[ "$($script_path/../templates/template.sh "${parameter_args[@]}" 2>&1 | tail -n 1)" == *"$msg"* ]] && success "$desc" || fail "$desc"
 )
 
 
