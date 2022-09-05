@@ -68,7 +68,7 @@ args::configure() {
 
         args::fill_default _configure_options "$var"
 
-        if [[ "${_configure_options[$var,tpe]:-}" == "bool" ]]; then
+        if [[ "${_configure_options[$var,tpe]:-}" == "flag" ]]; then
                 args::assign _configure_options "$var" "true"
                 ((i++))
         else
@@ -102,7 +102,7 @@ args::translate() {
                 local _translate_args_param_val_key="$var,value"
                 _lib_params_assoc+=( ["$_translate_args_param_arg_key"]="${_translate_args[$_translate_args_param_arg_key]}" )
                 _lib_params_order+=( "$_translate_args_param_arg_key" )
-                if [[ "${_translate_args[$var,tpe]:-}" != "bool" ]]; then
+                if [[ "${_translate_args[$var,tpe]:-}" != "flag" ]]; then
                     _lib_params_assoc+=( ["$_translate_args_param_val_key"]="${_translate_args[$_translate_args_param_val_key]}" )
                     _lib_params_order+=( "$_translate_args_param_val_key" )
                 fi

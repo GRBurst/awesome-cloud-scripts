@@ -115,7 +115,7 @@ check::requirements() {
     #   2.2 If there is a value that equals a parameter, we have to check
     #       2.2.1 whether the parameter is already given or
     #       2.2.2 the parameter is present in a later part of the parameter array
-    #   2.3 If the parameter is of type boolean, we don't have to check for further value arguments.
+    #   2.3 If the parameter is of type flag (boolean), we don't have to check for further value arguments.
     # 3. If the parameter is not required, we still have to check its sanity by precessing all steps from 2.
 
     local total_args_length="${#req_args[@]}"
@@ -138,12 +138,12 @@ check::requirements() {
 
         io::print_debug "  |Starting req_options loop with var = $var, ${req_options[$var,arg]:-}"
 
-        # If the variable is has a type set and the type is boolean (tpe == bool),
+        # If the variable is has a type set and the type is a flag (boolean, tpe == flag),
         # we don't have to check the argument and continue
         if [[ -n "${req_options[$var,tpe]:+set}" ]] \
-            && [[ "${req_options[$var,tpe]:-}" == "bool" ]]; then
+            && [[ "${req_options[$var,tpe]:-}" == "flag" ]]; then
             req_options+=( ["$var",_checked]="true" )
-            io::print_debug "  |$user_argument is boolean, skipping further checks"
+            io::print_debug "  |$user_argument is flag, skipping further checks"
             ((i++))
             continue
         fi

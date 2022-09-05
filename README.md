@@ -26,14 +26,30 @@ If you don’t have `nix-shell` on your system, you have to take care of the nee
 bash ./template.sh
 ```
 
-## Namings and Argument Definition
+## Namings
 
-| type (tpe) | can be optional? | arity | description                                   |
-| ---------- | ---------------- | ----- | --------------------------------------------- |
-| named      | yes              | n     | named parameter, e.g. --name <myvalue>        |
-| anonym     | no               | 1     | unamed parameter                              |
-| flag       | always           | 0     | single flag to toggle options, e.g. --my-bool |
-| multi      | yes              | n     | only at the end and only allowed once         |
+Some definitions:
+| name           | description                                            |
+| ---------------| ------------------------------------------------------ |
+| parameter      | short or long provided option, e.g. `--name` or `-n`   |
+| value          | argument for the script, optional preceeding a pameter |
+| argument (arg) | parameter or value                                     |
+
+Example:
+`myscript.sh -f <filename> --enable-logs <foo> <bar>`
+- `myscript.sh` is the name of the script
+- `-f`, `<filename>`, `--enable-logs`, `<foo>` and `<bar>` are all arguments
+- `-f` is a named parameter followed by its value `<filename>`
+- `--enable-logs` is a flag
+- `<foo>` and `<bar>` are unamed parameters
+
+Parameter types
+| type (tpe) | can be optional? | arity | description                                               |
+| ---------- | ---------------- | ----- | --------------------------------------------------------- |
+| named      | yes              | n     | named parameter followed by value, e.g. `--named <value>` |
+| anonym     | no               | 1     | value without no preceeding parameter                     |
+| flag       | always           | 0     | single flag to toggle options, e.g. --my-flag             |
+
 
 # Related
 

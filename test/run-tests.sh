@@ -37,9 +37,9 @@ ENV1="bar" ./test-unit.sh \
     --parameters "-p1 foo -e1 bar"
 
 ./test-unit.sh \
-    --desc "template with bool" \
-    --expected-result "hello --bool --par1 foo --env1 bar" \
-    --parameters "-p1 foo -e1 bar --bool"
+    --desc "template with flag" \
+    --expected-result "hello --flag --par1 foo --env1 bar" \
+    --parameters "-p1 foo -e1 bar --flag"
 
 ENV1="bar" ./test-unit.sh \
     --desc "template with env" \
@@ -52,9 +52,9 @@ ENV1="bar" ./test-unit.sh \
     --parameters "-p1 foo -e1 meh"
 
 ./test-unit.sh \
-    --desc "template with bool parameter and value" \
-    --expected-result "hello --bool --par1 -b --env1 bar" \
-    --parameters "-p1 -b -e1 bar --bool"
+    --desc "template with flag parameter and value" \
+    --expected-result "hello --flag --par1 -b --env1 bar" \
+    --parameters "-p1 -b -e1 bar --flag"
 
 ./test-unit.sh \
     --desc "template with env1 parameter and value" \
@@ -107,6 +107,6 @@ ENV1="bar" ./test-unit.sh \
     --parameters "-p1 foo -p3 muh -e1 bar"
 
 ./test-unit.sh \
-    --desc "template without short name tries to be bool" \
+    --desc "template without short name tries to be a flag" \
     --expected-result "[ERROR] Aborting. Value of -p3 is -e1, which is a parameter, too." \
     --parameters "-p1 foo -p3 -e1 bar"

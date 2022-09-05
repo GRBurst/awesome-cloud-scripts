@@ -37,7 +37,7 @@ declare -A options=(
     [p1,arg]="--par1"                        [p1,short]="-p1" [p1,required]=true  [p1,desc]="PAR1"
     [p2,arg]="--par2"                        [p2,short]="-p2"                     [p2,desc]="PAR2"       [p2,arity]=2 [p2,required]=false
     [p3,arg]="-p3"                                                                [p3,desc]="PAR1" [p3,required]=false
-    [b,arg]="--bool"                         [b,short]="-b"                       [b,desc]="Bool Switch" [b,tpe]="bool" [b,required]=false
+    [f,arg]="--flag"                         [f,short]="-f"                       [f,desc]="Switch" [f,tpe]="flag" [f,required]=false
 )
 
 # Define your usage and help message here
@@ -75,6 +75,7 @@ run() (
     hello -g "hello ${p1_params[*]}"
 
     hello -g "hello $(cook::get_str p1)"
+    declare -p params
 
     # Or use all the parameter with the defined array params
     hello -g "hello ${params[*]}"
