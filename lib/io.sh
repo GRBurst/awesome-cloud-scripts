@@ -21,6 +21,12 @@ io::print_debug() (
     fi
 )
 
+io::print_debug_error() (
+    if [[ "${DEBUG:-}" == "true" ]]; then
+        io::print_error "$*"
+    fi
+)
+
 io::print_debug_success() (
     if [[ "${DEBUG:-}" == "true" ]]; then
         local msg

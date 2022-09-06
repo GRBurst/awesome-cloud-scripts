@@ -58,7 +58,7 @@ cook::array_from_str() {
 }
 
 cleanup() (
-    >&2 echo "Error: (${1:-}) occurred on line ${2:-} in ${3:-}"
+    io::print_debug_error "Error: (${1:-}) occurred on line ${2:-} in ${3:-}"
 )
 
 trap 'cleanup $? $LINENO ${BASH_SOURCE##*/}' ERR
