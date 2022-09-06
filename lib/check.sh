@@ -11,26 +11,21 @@ if [[ "${SCRIPT_COOK_IO_LOADED:-}" != "true" ]]; then
 fi
 
 check::declaration() (
-    local -rn declare_options="$1"
+    local -rn declare_options_ref="$1"
     local -a error_vars
     local -A rows cols
 
-    common::get_keys_matrix declare_options rows cols
+    common::get_keys_matrix declare_options_ref rows cols
 
     for var in "${!rows[@]}"; do
-        if [[ -z "${declare_options[$var,arg]:+set}" ]]; then
-            io::print_error "[$var,arg] missing. Please provide a (long) argument by adding [$var,arg] to your declare_options."
-            error_vars+=( "$var" )
-        fi
-
-        if [[ -z "${declare_options[$var,required]:+set}" ]]; then
-            io::print_error "[$var,required] missing. Please define the required argument by adding [$var,required] to your declare_options."
+        if [[ -z "${declare_options_ref[$var,arg]:+set}" ]]; then
+            io::print_error "[$var,arg] missing. Please provide a (long) argument by adding [$var,arg] to your options."
             error_vars+=( "$var" )
         fi
     done
-    if [[ -n "${error_vars:+set}" ]]; then
-        io::print_error "Found ${#error_vars} errors"
-        _print_option_matrix declare_options error_vars
+    if [[ -n "${error_vars:+set}" ]] && ((  "${#error_vars[@]}" > 0 )); then
+        io::print_error "Found ${#error_vars[@]} errors: ${error_vars[@]}"
+        io::print_option_matrix declare_options_ref error_vars
         exit 1
     fi
 )

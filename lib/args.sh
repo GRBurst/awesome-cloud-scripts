@@ -83,6 +83,7 @@ args::configure() {
             (( i=i+user_arg_arity+1 ))
         fi
     done
+    return 0
 }
 
 args::translate() {
