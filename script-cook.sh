@@ -38,7 +38,7 @@ cook::process() {
 cook::get() {
     local -n cook_get_options="$1"
     local cook_get_arg="${2:-}"
-    args::get cook_get_options cook_get_arg
+    args::get cook_get_options "$cook_get_arg"
 }
 cook::get_str() {
     args::get_str "$1"
@@ -46,7 +46,7 @@ cook::get_str() {
 cook::get_values() {
     local -n cook_get_values_options="$1"
     local cook_get_values_arg="${2:-}"
-    args::get_values cook_get_values_options cook_get_values_arg
+    args::get_values cook_get_values_options "$cook_get_values_arg"
 }
 cook::get_values_str() {
     args::get_values_str "$1"
