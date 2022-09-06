@@ -202,3 +202,32 @@ io::print_values_matrix() (
     done
 
 )
+
+io::parse() {
+    local -n parse_options_str_options_ref="$1"
+    local -r parse_options_str_options_str="$2"
+
+    cleaned_options_str=$(echo "$parse_options_str_options_str" | grep -v "^#" | sed 's/ //g')
+    delim="${cleaned_options_str:0:1}"
+    prep_options="$(echo "${cleaned_options_str}" | sed -e 's/^|*//g' -e 's/|*$//g' -e 's/^[[:blank:]]*//g' -e 's/[[:blank:]]*$//g' | tr -s '[:space:]')"
+
+    readarray -d "$delim" -s 1 -t columns < <(printf '%s' "$( echo -n "${prep_options}" | head -n 1)" )
+
+    readarray -d ' ' -t myids < <(printf '%s' "$(while read l; do
+        printf "${l}" | cut -d "$delim" -f 1
+    done < <( echo "$prep_options" | tail -n +2 ) | tr '\n' ' ' | tr -s '[:space:]' )" )
+
+    readarray -d '|' -t myarray < <(printf '%s' "$(while read l; do
+        printf "${l}${delim}" | cut -d "$delim" -f 2-
+    done < <( echo "$prep_options" | tail -n +2 ) | tr -d '\n' )" )
+
+    local -i idx=0
+    for id in "${myids[@]}"; do
+        for col in "${columns[@]}"; do
+            io::print_debug "$(printf "%18s " "[$id,$col]=${myarray[$idx]:-}")"
+            parse_options_str_options_ref+=( ["$id","$col"]="${myarray["$idx"]:-}")
+            ((idx+=1))
+        done
+        io::print_debug "$(printf "\n")"
+    done
+}
