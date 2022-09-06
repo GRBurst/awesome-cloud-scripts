@@ -169,7 +169,7 @@ io::print_values_matrix() (
         for var in "${!rows[@]}"; do
             local val="${print_values_matrix_options_ref[$var,$arg]:-}"
             local -i length="${cols_length[$arg]:-0}"
-            if (( "${#val}" > length )); then 
+            if (( "${#val}" >= length )); then # >= to always set it
                 cols_length+=( [$arg]=${#val} )
             fi
         done

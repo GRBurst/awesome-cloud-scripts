@@ -75,9 +75,9 @@ run() (
     hello -g "hello ${p1_params[*]}"
 
     hello -g "hello $(cook::get_str p1)"
-    declare -p params
 
     # Or use all the parameter with the defined array params
+    declare -p params
     hello -g "hello ${params[*]}"
 
 )
