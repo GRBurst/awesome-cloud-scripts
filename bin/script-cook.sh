@@ -2,16 +2,16 @@
 set -Eeuo pipefail
 
 if [[ "${SCRIPT_COOK_COMMON_LOADED:-}" != "true" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
+    source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 fi
 if [[ "${SCRIPT_COOK_IO_LOADED:-}" != "true" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/lib/io.sh"
+    source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
 fi
 if [[ "${SCRIPT_COOK_CHECK_LOADED:-}" != "true" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/lib/check.sh"
+    source "$(dirname "${BASH_SOURCE[0]}")/../lib/check.sh"
 fi
 if [[ "${SCRIPT_COOK_ARGS_LOADED:-}" != "true" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/lib/args.sh"
+    source "$(dirname "${BASH_SOURCE[0]}")/../lib/args.sh"
 fi
 
 unset test_assoc_array
