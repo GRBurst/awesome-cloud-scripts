@@ -93,7 +93,7 @@ check::requirements() {
     # Iterate all variables (rows of the option matrix) and check if the required parameters are set
     # No sanity or value check here, we only check if all parameters are provided
     for var in "${!rows[@]}"; do
-        if [[ "${req_options[$var,required]:-}" != "true" ]]; then 
+        if [[ "${req_options[$var,required]:-false}" != "true" ]]; then 
             io::print_debug "${req_options[$var,desc]:-} not required, skipping"
             continue
         fi

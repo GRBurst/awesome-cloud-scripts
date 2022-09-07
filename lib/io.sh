@@ -69,7 +69,7 @@ io::generate_usage() (
 
     for var in "${!rows[@]}"; do
         if [[ -n "${genenrate_usage_options_ref[$var,value]+set}" ]]; then
-            if [[ "${genenrate_usage_options_ref[$var,required]}" == "true" ]]; then
+            if [[ "${genenrate_usage_options_ref[$var,required]:-false}" == "true" ]]; then
                 required_env+="$(\
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
@@ -87,7 +87,7 @@ io::generate_usage() (
                     $short_length $arg_length)"
             fi
         else
-            if [[ "${genenrate_usage_options_ref[$var,required]}" == "true" ]]; then
+            if [[ "${genenrate_usage_options_ref[$var,required]:-false}" == "true" ]]; then
                 required+="$(\
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
