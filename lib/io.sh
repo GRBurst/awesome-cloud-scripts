@@ -229,7 +229,9 @@ io::parse() {
                 io_parse_options_ref+=( ["$id","$col"]="${myarray["$idx"]}")
             elif [[ "$col" == "value" ]] && [[ -n "${myarray["$idx"]:+set}" ]]; then
                 local -n io_parse_env_var="${myarray[$idx]}"
-                io_parse_options_ref+=( ["$id","$col"]="$(echo "${!io_parse_env_var}" )" )
+                if [[ -n "${io_parse_env_var:+set}" ]]; then
+                    io_parse_options_ref+=( ["$id","$col"]="$(echo "${io_parse_env_var}" )" )
+                fi
             fi
             ((idx+=1))
         done
