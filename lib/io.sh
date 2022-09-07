@@ -225,7 +225,12 @@ io::parse() {
     for id in "${myids[@]}"; do
         for col in "${columns[@]}"; do
             io::print_debug "$(printf "%18s " "[$id,$col]=${myarray[$idx]:-}")"
-            io_parse_options_ref+=( ["$id","$col"]="${myarray["$idx"]:-}")
+            if [[ "$col" != "value" ]] && [[ -n "${myarray["$idx"]:+set}" ]]; then
+                io_parse_options_ref+=( ["$id","$col"]="${myarray["$idx"]}")
+            elif [[ "$col" == "value" ]] && [[ -n "${myarray["$idx"]:+set}" ]]; then
+                local -n io_parse_env_var="${myarray[$idx]}"
+                io_parse_options_ref+=( ["$id","$col"]="$(echo "${!io_parse_env_var}" )" )
+            fi
             ((idx+=1))
         done
         io::print_debug "$(printf "\n")"

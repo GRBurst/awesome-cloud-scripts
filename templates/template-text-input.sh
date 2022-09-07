@@ -34,15 +34,15 @@ declare -r options_str=$(cat <<OPTIONS
 # delimiter is the first character in your table to split the variables.
 # here, it is '|', because it is the first character in the column name row,
 # which is starting with ' | id | tpe | ... '
-# -  | named  | -      | -     | -         | false    | 1     | \$arg  | <-- default values
-| id | tpe    | arg    | short | value     | required | arity | desc   |
+# -  | named  | -      | -     | -     | false    | 1     | \$arg  | <-- default values
+| id | tpe    | arg    | short | value | required | arity | desc   |
 # -------------------------------------------------------------------- #
-| e1 |        | --env1 | -e1   | ${ENV1:-} | true     |       | ENV1   |
-| e2 |        | --env2 | -e2   | ${ENV2:-} |          |       | ENV2   |
-| p1 |        | --par1 | -p1   |           | true     |       | PAR1   |
-| p2 |        | --par2 | -p2   |           |          | 2     | PAR2   |
-| p3 |        | --par3 | -p3   |           |          |       | PAR3   |
-|  f | flag   | --flag | -f    |           |          |       | Switch |
+| e1 |        | --env1 | -e1   | ENV1  | true     |       | ENV1   |
+| e2 |        | --env2 | -e2   | ENV2  |          |       | ENV2   |
+| p1 |        | --par1 | -p1   |       | true     |       | PAR1   |
+| p2 |        | --par2 | -p2   |       |          | 2     | PAR2   |
+| p3 |        | -p 3   |       |       |          |       | PAR3   |
+|  f | flag   | --flag | -f    |       |          |       | Switch |
 OPTIONS
 )
 
@@ -97,14 +97,17 @@ run() (
 # This is the base frame and it shouldn't be necessary to touch it
 self() (
     declare -a args=( "$@" )
+
+    if [[ -n "${options_str:+set}" ]]; then
+        cook::parse options "$options_str"
+    fi
+
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
+    elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
+        return 0
     else 
-        cook::parse options "$options_str"
-
-        if (cook::check options args); then
-            cook::process options args params && run
-        fi
+        cook::process options args params && run
     fi
 )
 

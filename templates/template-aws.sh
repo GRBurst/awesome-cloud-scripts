@@ -67,15 +67,18 @@ run() (
 # This is the base frame and it shouldn't be necessary to touch it
 self() (
     declare -a args=( "$@" )
-    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
-        usage
-    elif (cook::check options args); then
 
-        cook::process options args params
-
-        run
+    if [[ -n "${options_str:+set}" ]]; then
+        cook::parse options "$options_str"
     fi
 
+    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
+        usage
+    elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
+        return 0
+    else 
+        cook::process options args params && run
+    fi
 )
 
 self "$@"

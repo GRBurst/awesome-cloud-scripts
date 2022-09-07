@@ -33,7 +33,12 @@ cook::process() {
     local -n script_cook_options="$1"
     local -n script_cook_args="$2"
     local -n script_cook_params="$3"
-    args::process script_cook_options script_cook_args script_cook_params
+
+    if (check::requirements script_cook_options script_cook_args); then
+        args::process script_cook_options script_cook_args script_cook_params
+    else
+        return 1
+    fi
 }
 cook::get() {
     local -n cook_get_options="$1"
