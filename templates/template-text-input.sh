@@ -7,7 +7,7 @@
 
 set -Eeuo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/../script-cook.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../bin/script-cook.sh"
 
 # This will contain the resulting parameters of your command
 declare -a params
@@ -100,7 +100,7 @@ self() (
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
     else 
-        io::parse options "$options_str"
+        cook::parse options "$options_str"
 
         if (cook::check options args); then
             cook::process options args params && run

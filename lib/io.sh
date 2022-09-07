@@ -204,10 +204,10 @@ io::print_values_matrix() (
 )
 
 io::parse() {
-    local -n parse_options_str_options_ref="$1"
-    local -r parse_options_str_options_str="$2"
+    local -n io_parse_options_ref="$1"
+    local -r io_parse_options_str="$2"
 
-    cleaned_options_str=$(echo "$parse_options_str_options_str" | grep -v "^#" | sed 's/ //g')
+    cleaned_options_str=$(echo "$io_parse_options_str" | grep -v "^#" | sed 's/ //g')
     delim="${cleaned_options_str:0:1}"
     prep_options="$(echo "${cleaned_options_str}" | sed -e 's/^|*//g' -e 's/|*$//g' -e 's/^[[:blank:]]*//g' -e 's/[[:blank:]]*$//g' | tr -s '[:space:]')"
 
@@ -225,7 +225,7 @@ io::parse() {
     for id in "${myids[@]}"; do
         for col in "${columns[@]}"; do
             io::print_debug "$(printf "%18s " "[$id,$col]=${myarray[$idx]:-}")"
-            parse_options_str_options_ref+=( ["$id","$col"]="${myarray["$idx"]:-}")
+            io_parse_options_ref+=( ["$id","$col"]="${myarray["$idx"]:-}")
             ((idx+=1))
         done
         io::print_debug "$(printf "\n")"

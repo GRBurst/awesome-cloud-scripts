@@ -7,7 +7,7 @@
 
 set -Eeuo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/../script-cook.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../bin/script-cook.sh"
 
 # This will contain the resulting parameters of your command
 declare -a params

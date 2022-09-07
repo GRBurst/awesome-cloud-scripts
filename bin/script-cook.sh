@@ -56,6 +56,11 @@ cook::array_from_str() {
     local cook_array_from_str_str="$2"
     common::get_array_from_str cook_array_from_str_array "$cook_array_from_str_str"
 }
+cook::parse() {
+    local -n cook_parse_options_ref="$1"
+    local -r cook_parse_options_str="$2"
+    io::parse cook_parse_options_ref "$cook_parse_options_str"
+}
 
 cleanup() (
     io::print_debug_error "Error: (${1:-}) occurred on line ${2:-} in ${3:-}"
