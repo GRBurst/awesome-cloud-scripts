@@ -58,7 +58,7 @@ io::generate_usage() (
 
     for var in "${!rows[@]}"; do
         local short="${genenrate_usage_options_ref[$var,short]:-}"
-        local arg="${genenrate_usage_options_ref[$var,arg]:-}"
+        local arg="${genenrate_usage_options_ref[$var,param]:-}"
         if (( ${#short} > short_length )); then
             (( short_length=${#short} ))
         fi
@@ -73,7 +73,7 @@ io::generate_usage() (
                 required_env+="$(\
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
-                    "${genenrate_usage_options_ref[$var,arg]}" \
+                    "${genenrate_usage_options_ref[$var,param]}" \
                     "${genenrate_usage_options_ref[$var,desc]}" \
                     "variable or argument" \
                     $short_length $arg_length)"
@@ -81,7 +81,7 @@ io::generate_usage() (
                 optional_env+="$(\
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
-                    "${genenrate_usage_options_ref[$var,arg]}" \
+                    "${genenrate_usage_options_ref[$var,param]}" \
                     "${genenrate_usage_options_ref[$var,desc]}" \
                     "variable or argument" \
                     $short_length $arg_length)"
@@ -91,7 +91,7 @@ io::generate_usage() (
                 required+="$(\
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
-                    "${genenrate_usage_options_ref[$var,arg]}" \
+                    "${genenrate_usage_options_ref[$var,param]}" \
                     "${genenrate_usage_options_ref[$var,desc]}" \
                     "argument" \
                     $short_length $arg_length)"
@@ -99,7 +99,7 @@ io::generate_usage() (
                 optional+="$(\
                     io::print_var_usage \
                     "${genenrate_usage_options_ref[$var,short]:-}" \
-                    "${genenrate_usage_options_ref[$var,arg]}" \
+                    "${genenrate_usage_options_ref[$var,param]}" \
                     "${genenrate_usage_options_ref[$var,desc]}" \
                     "argument" \
                     $short_length $arg_length)"

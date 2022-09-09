@@ -6,9 +6,9 @@ declare script_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$script_path/../bin/script-cook.sh"
 
 declare -A options=(
-    [d,arg]="--desc"            [d,short]="-d" [d,required]=true  [d,desc]="description"
-    [e,arg]="--expected-result" [e,short]="-e" [e,required]=true  [e,desc]="result message"
-    [p,arg]="--parameters"      [p,short]="-p" [p,required]=false [p,desc]="parameters"
+    [d,param]="--desc"            [d,short]="-d" [d,required]=true  [d,desc]="description"
+    [e,param]="--expected-result" [e,short]="-e" [e,required]=true  [e,desc]="result message"
+    [p,param]="--parameters"      [p,short]="-p" [p,required]=false [p,desc]="parameters"
 )
 # This will contain the resulting parameters of your command
 declare -a params

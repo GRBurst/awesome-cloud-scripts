@@ -30,17 +30,17 @@ bash ./template.sh
 
 Some definitions:
 | name           | description                                            |
-| ---------------| ------------------------------------------------------ |
+| ---------------- | ------------------------------------------------------ |
+| input            | parameter or value                                     |
 | parameter      | short or long provided option, e.g. `--name` or `-n`   |
-| value          | argument for the script, optional preceeding a pameter |
-| argument (arg) | parameter or value                                     |
+| value / argument | argument for the script, optional preceeding a pameter |
 
 Example:
 `myscript.sh -f <filename> --enable-logs <foo> <bar>`
 - `myscript.sh` is the name of the script
-- `-f`, `<filename>`, `--enable-logs`, `<foo>` and `<bar>` are all arguments
+- `-f`, `<filename>`, `--enable-logs`, `<foo>` and `<bar>` are all inputs
 - `-f` is a named parameter followed by its value `<filename>`
-- `--enable-logs` is a flag
+- `--enable-logs` is a flag parameter
 - `<foo>` and `<bar>` are unamed parameters
 
 Parameter types

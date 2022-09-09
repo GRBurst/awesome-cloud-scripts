@@ -24,7 +24,7 @@ declare -a params
 # The script assumes the 2-dim array keys to be separated by a comme (,).
 # Variables are checked by searching all arguments for the representing arg or its short version.
 #   -> In our case: To check e1, we search for --env1 or -e1, because we defined the 
-#                   arg with [e1,arg]="--env1" and its short version with [e1,short]="-e1"
+#                   arg with [e1,param]="--env1" and its short version with [e1,short]="-e1"
 # Requriered parameters are checked and a usful error is provided if they are omitted.
 # If your value can be provided by an environment variable, you have to define the environment value.
 #   -> In our case: [e1,value]="{ENV1:-}" and [e2,value]="${ENV2:-}"
@@ -32,12 +32,12 @@ declare -a params
 # you must not (!) define it for the build in evaluation to work.
 #   -> In our case: [p1,value], [p2,value] and [b,value] are not defined in the array
 declare -A options=(
-    [e1,arg]="--env1" [e1,value]="${ENV1:-}" [e1,short]="-e1" [e1,required]=true  [e1,desc]="ENV1"
-    [e2,arg]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2"                     [e2,desc]="ENV2" [e2,required]=false
-    [p1,arg]="--par1"                        [p1,short]="-p1" [p1,required]=true  [p1,desc]="PAR1"
-    [p2,arg]="--par2"                        [p2,short]="-p2"                     [p2,desc]="PAR2"       [p2,arity]=2 [p2,required]=false
-    [p3,arg]="-p3"                                                                [p3,desc]="PAR1" [p3,required]=false
-    [f,arg]="--flag"                         [f,short]="-f"                       [f,desc]="Switch" [f,tpe]="flag" [f,required]=false
+    [e1,param]="--env1" [e1,value]="${ENV1:-}" [e1,short]="-e1" [e1,required]=true  [e1,desc]="ENV1"
+    [e2,param]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2"                     [e2,desc]="ENV2" [e2,required]=false
+    [p1,param]="--par1"                        [p1,short]="-p1" [p1,required]=true  [p1,desc]="PAR1"
+    [p2,param]="--par2"                        [p2,short]="-p2"                     [p2,desc]="PAR2"       [p2,arity]=2 [p2,required]=false
+    [p3,param]="-p3"                                                                [p3,desc]="PAR1" [p3,required]=false
+    [f,param]="--flag"                         [f,short]="-f"                       [f,desc]="Switch" [f,tpe]="flag" [f,required]=false
 )
 
 # Define your usage and help message here

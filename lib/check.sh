@@ -18,8 +18,8 @@ check::declaration() (
     common::get_keys_matrix declare_options_ref rows cols
 
     for var in "${!rows[@]}"; do
-        if [[ -z "${declare_options_ref[$var,arg]:+set}" ]]; then
-            io::print_error "[$var,arg] missing. Please provide a (long) argument by adding [$var,arg] to your options."
+        if [[ -z "${declare_options_ref[$var,param]:+set}" ]]; then
+            io::print_error "[$var,param] missing. Please provide a (long) argument by adding [$var,param] to your options."
             error_vars+=( "$var" )
         fi
     done
@@ -37,11 +37,11 @@ check::param() (
 
     io::print_debug "check if any of (\
 ${param_options[$var,short]:+" ${param_options[$var,short]}, "}\
-${param_options[$var,arg]}\
+${param_options[$var,param]}\
 ) are contained in: ${param_args[*]}"
 
     if [[ "${param_args[*]}" =~ ${param_options[$var,short]:-} ]] \
-        || [[ "${param_args[*]}" =~ ${param_options[$var,arg]} ]]
+        || [[ "${param_args[*]}" =~ ${param_options[$var,param]} ]]
     then
         return 0
     fi
@@ -131,7 +131,7 @@ check::requirements() {
             continue
         fi
 
-        io::print_debug "  |Starting req_options loop with var = $var, ${req_options[$var,arg]:-}"
+        io::print_debug "  |Starting req_options loop with var = $var, ${req_options[$var,param]:-}"
 
         # If the variable is has a type set and the type is a flag (boolean, tpe == flag),
         # we don't have to check the argument and continue
@@ -166,7 +166,7 @@ check::requirements() {
 
             # Check if the next argument is not a parameter etc
             for next_var in "${!rows[@]}"; do # all variables from req_options
-                local next_argument_option="${req_options[$next_var,arg]}"
+                local next_argument_option="${req_options[$next_var,param]}"
                 local next_argument_option_short="${req_options[$next_var,short]:-}"
 
                 # If the next argument does not equal a parameter, we are save to continue

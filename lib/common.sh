@@ -29,7 +29,7 @@ common::get_variable_from_param() (
 
     common::get_keys_matrix get_variable_options rows cols
     for var in "${!rows[@]}"; do
-        if [[ "$param" == "${get_variable_options[$var,arg]}" ]] \
+        if [[ "$param" == "${get_variable_options[$var,param]}" ]] \
             || [[ "$param" == "${get_variable_options[$var,short]:-}" ]]; then 
             res="$var"
         fi

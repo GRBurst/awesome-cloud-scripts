@@ -40,7 +40,7 @@ args::fill_default() {
         fi
     done
     if [[ -z "${fill_default_options_ref[$var,desc]:+set}" ]]; then
-        fill_default_options_ref+=( [$var,desc]="${fill_default_options_ref[$var,arg]:-$par}" )
+        fill_default_options_ref+=( [$var,desc]="${fill_default_options_ref[$var,param]:-$par}" )
     fi
 
 }
@@ -100,7 +100,7 @@ args::translate() {
         for var in "${!_translate_rows[@]}"; do
             if [[ -n "${_translate_args[$var,value]:+set}" ]]; then
                 # value is set and not empty
-                local _translate_args_param_arg_key="$var,arg"
+                local _translate_args_param_arg_key="$var,param"
                 local _translate_args_param_val_key="$var,value"
                 _lib_params_assoc+=( ["$_translate_args_param_arg_key"]="${_translate_args[$_translate_args_param_arg_key]}" )
                 _lib_params_order+=( "$_translate_args_param_arg_key" )

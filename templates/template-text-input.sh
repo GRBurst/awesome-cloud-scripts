@@ -23,7 +23,7 @@ declare -A options
 #   -> In our case: arg, value, short, required, desc, tpe and arity are our attributes
 # Variables are checked by searching all arguments for the representing arg or its short version.
 #   -> In our case: To check e1, we search for --env1 or -e1, because we defined the 
-#                   arg with [e1,arg]="--env1" and its short version with [e1,short]="-e1"
+#                   arg with [e1,param]="--env1" and its short version with [e1,short]="-e1"
 # Requriered parameters are checked and a usful error is provided if they are omitted.
 # If your value can be provided by an environment variable, you have to define the environment value.
 #   -> In our case: [e1,value]="{ENV1:-}" and [e2,value]="${ENV2:-}"
@@ -34,8 +34,8 @@ declare -r options_str=$(cat <<OPTIONS
 # delimiter is the first character in your table to split the variables.
 # here, it is '|', because it is the first character in the column name row,
 # which is starting with ' | id | tpe | ... '
-# -  | named  | -      | -     | -     | false    | 1     | \$arg  | <-- default values
-| id | tpe    | arg    | short | value | required | arity | desc   |
+# -  | named  | -      | -     | -     | false    | 1     | -      | <-- default values
+| id | tpe    | param  | short | value | required | arity | desc   |
 # -------------------------------------------------------------------- #
 | e1 |        | --env1 | -e1   | ENV1  | true     |       | ENV1   |
 | e2 |        | --env2 | -e2   | ENV2  |          |       | ENV2   |
