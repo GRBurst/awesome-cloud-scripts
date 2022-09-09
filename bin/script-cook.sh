@@ -3,15 +3,23 @@ set -Eeuo pipefail
 
 if [[ "${SCRIPT_COOK_COMMON_LOADED:-}" != "true" ]]; then
     source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+else
+    io::print_debug "SCRIPT_COOK_COMMON_LOADED already loaded"
 fi
 if [[ "${SCRIPT_COOK_IO_LOADED:-}" != "true" ]]; then
     source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
+else
+    io::print_debug "SCRIPT_COOK_IO_LOADED already loaded"
 fi
 if [[ "${SCRIPT_COOK_CHECK_LOADED:-}" != "true" ]]; then
     source "$(dirname "${BASH_SOURCE[0]}")/../lib/check.sh"
+else
+    io::print_debug "SCRIPT_COOK_CHECK_LOADED already loaded"
 fi
 if [[ "${SCRIPT_COOK_ARGS_LOADED:-}" != "true" ]]; then
     source "$(dirname "${BASH_SOURCE[0]}")/../lib/args.sh"
+else
+    io::print_debug "SCRIPT_COOK_ARGS_LOADED already loaded"
 fi
 
 unset test_assoc_array
@@ -67,8 +75,15 @@ cook::parse() {
     io::parse cook_parse_options_ref "$cook_parse_options_str"
 }
 
-cleanup() (
+cook::clean() {
+    unset SCRIPT_COOK_COMMON_LOADED
+    unset SCRIPT_COOK_IO_LOADED
+    unset SCRIPT_COOK_CHECK_LOADED
+    unset SCRIPT_COOK_ARGS_LOADED
+}
+cook::on_err() {
+    cook::clean
     io::print_debug_error "Error: (${1:-}) occurred on line ${2:-} in ${3:-}"
-)
+}
 
-trap 'cleanup $? $LINENO ${BASH_SOURCE##*/}' ERR
+trap 'cook::on_err $? $LINENO ${BASH_SOURCE##*/}' ERR

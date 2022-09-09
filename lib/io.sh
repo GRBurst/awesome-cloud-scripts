@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 set -Eeuo pipefail
 
-declare -xr SCRIPT_COOK_IO_LOADED=true
+declare -x SCRIPT_COOK_IO_LOADED=true
 
 if [[ "${SCRIPT_COOK_COMMON_LOADED:-}" != "true" ]]; then
     source "$(dirname "${BASH_SOURCE[0]}")/common.sh"

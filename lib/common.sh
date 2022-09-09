@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 set -Eeuo pipefail
 
-declare -xr SCRIPT_COOK_COMMON_LOADED=true
+declare -x SCRIPT_COOK_COMMON_LOADED=true
 
 common::get_keys_matrix() {
     local -rn _get_keys_matrix_assoc="$1"

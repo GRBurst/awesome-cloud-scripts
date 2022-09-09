@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 declare script_path="$(dirname "${BASH_SOURCE[0]}")"
-source "$script_path/../script-cook.sh"
+source "$script_path/../bin/script-cook.sh"
 
 declare -A options=(
     [d,arg]="--desc"            [d,short]="-d" [d,required]=true  [d,desc]="description"
@@ -55,6 +55,8 @@ run() (
     cook::array_from_str parameter_args "$pars"
 
     [[ "$($script_path/../templates/template.sh "${parameter_args[@]}" 2>&1 | tail -n 1)" == *"$msg"* ]] && success "$desc" || fail "$desc"
+
+    [[ "$($script_path/../templates/template-text-input.sh "${parameter_args[@]}" 2>&1 | tail -n 1)" == *"$msg"* ]] && success "$desc" || fail "$desc"
 )
 
 
@@ -65,9 +67,8 @@ self() (
         usage
     elif (cook::check options args); then
 
-        cook::process options args params
-
-        run
+        cook::process options args params && run
+        cook::clean
     fi
 
 )

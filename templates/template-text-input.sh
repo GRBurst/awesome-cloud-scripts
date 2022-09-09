@@ -2,7 +2,7 @@
 #! nix-shell -i bash
 #! nix-shell -p hello
 #! nix-shell --keep ENV1 --keep ENV2 --keep DEBUG
-##! nix-shell --pure
+#! nix-shell --pure
 # add '#' for the line / shebangs above after finishing development of the script.
 
 set -Eeuo pipefail
@@ -105,9 +105,11 @@ self() (
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
     elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
+        echo "1.0.0"
         return 0
     else 
         cook::process options args params && run
+        cook::clean
     fi
 )
 

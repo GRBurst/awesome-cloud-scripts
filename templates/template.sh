@@ -98,9 +98,11 @@ self() (
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
     elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
+        echo "1.0.0"
         return 0
     else 
         cook::process options args params && run
+        cook::clean
     fi
 )
 
