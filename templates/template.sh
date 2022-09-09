@@ -31,7 +31,7 @@ declare -a params
 # If you don't want it to be set by an environment variable (so it can only be configured by parameters),
 # you must not (!) define it for the build in evaluation to work.
 #   -> In our case: [p1,value], [p2,value] and [b,value] are not defined in the array
-declare -A options=(
+declare -A inputs=(
     [e1,param]="--env1" [e1,value]="${ENV1:-}" [e1,short]="-e1" [e1,required]=true  [e1,desc]="ENV1"
     [e2,param]="--env2" [e2,value]="${ENV2:-}" [e2,short]="-e2"                     [e2,desc]="ENV2" [e2,required]=false
     [p1,param]="--par1"                        [p1,short]="-p1" [p1,required]=true  [p1,desc]="PAR1"
@@ -55,7 +55,7 @@ Usage and Examples
     $script_name
 
 
-$(cook::usage options)
+$(cook::usage inputs)
 USAGE
 )
 
@@ -91,8 +91,8 @@ run() (
 self() (
     declare -a args=( "$@" )
 
-    if [[ -n "${options_str:+set}" ]]; then
-        cook::parse options "$options_str"
+    if [[ -n "${inputs_str:+set}" ]]; then
+        cook::parse inputs "$inputs_str"
     fi
 
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
@@ -100,8 +100,8 @@ self() (
     elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
         echo "1.0.0"
         return 0
-    else 
-        cook::process options args params && run
+    else
+        cook::process inputs args params && run
         cook::clean
     fi
 )

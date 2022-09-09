@@ -11,7 +11,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../bin/script-cook.sh"
 
 # This will contain the resulting parameters of your command
 declare -a params
-declare -A options
+declare -A inputs
 
 ############################################
 ########## BEGIN OF CUSTOMISATION ##########
@@ -30,7 +30,7 @@ declare -A options
 # If you don't want it to be set by an environment variable (so it can only be configured by parameters),
 # you must not (!) define it for the build in evaluation to work.
 #   -> In our case: [p1,value], [p2,value] and [f,value] are not defined in the array
-declare -r options_str=$(cat <<OPTIONS
+declare -r inputs_str=$(cat <<INPUTSTR
 # delimiter is the first character in your table to split the variables.
 # here, it is '|', because it is the first character in the column name row,
 # which is starting with ' | id | tpe | ... '
@@ -43,7 +43,7 @@ declare -r options_str=$(cat <<OPTIONS
 | p2 |        | --par2 | -p2   |       |          | 2     | PAR2   |
 | p3 |        | -p 3   |       |       |          |       | PAR3   |
 |  f | flag   | --flag | -f    |       |          |       | Switch |
-OPTIONS
+INPUTSTR
 )
 
 
@@ -62,7 +62,7 @@ Usage and Examples
     $script_name
 
 
-$(cook::usage options)
+$(cook::usage inputs)
 USAGE
 )
 
@@ -98,8 +98,8 @@ run() (
 self() (
     declare -a args=( "$@" )
 
-    if [[ -n "${options_str:+set}" ]]; then
-        cook::parse options "$options_str"
+    if [[ -n "${inputs_str:+set}" ]]; then
+        cook::parse inputs "$inputs_str"
     fi
 
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
@@ -107,8 +107,8 @@ self() (
     elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
         echo "1.0.0"
         return 0
-    else 
-        cook::process options args params && run
+    else
+        cook::process inputs args params && run
         cook::clean
     fi
 )

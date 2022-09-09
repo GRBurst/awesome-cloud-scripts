@@ -29,37 +29,37 @@ if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
 fi
 
 cook::usage() {
-    local -rn cook_usage_options="$1"
-    io::generate_usage cook_usage_options
+    local -rn cook_usage_inputs="$1"
+    io::generate_usage cook_usage_inputs
 }
 cook::check() {
-    local -n cook_check_requirements_options="$1"
+    local -n cook_check_requirements_inputs="$1"
     local -n cook_check_requirements_arg="$2"
-    check::requirements cook_check_requirements_options cook_check_requirements_arg
+    check::requirements cook_check_requirements_inputs cook_check_requirements_arg
 }
 cook::process() {
-    local -n script_cook_options="$1"
+    local -n script_cook_inputs="$1"
     local -n script_cook_args="$2"
     local -n script_cook_params="$3"
 
-    if (check::requirements script_cook_options script_cook_args); then
-        args::process script_cook_options script_cook_args script_cook_params
+    if (check::requirements script_cook_inputs script_cook_args); then
+        args::process script_cook_inputs script_cook_args script_cook_params
     else
         return 1
     fi
 }
 cook::get() {
-    local -n cook_get_options="$1"
+    local -n cook_get_inputs="$1"
     local cook_get_arg="${2:-}"
-    args::get cook_get_options "$cook_get_arg"
+    args::get cook_get_inputs "$cook_get_arg"
 }
 cook::get_str() {
     args::get_str "$1"
 }
 cook::get_values() {
-    local -n cook_get_values_options="$1"
+    local -n cook_get_values_inputs="$1"
     local cook_get_values_arg="${2:-}"
-    args::get_values cook_get_values_options "$cook_get_values_arg"
+    args::get_values cook_get_values_inputs "$cook_get_values_arg"
 }
 cook::get_values_str() {
     args::get_values_str "$1"
@@ -70,9 +70,9 @@ cook::array_from_str() {
     common::get_array_from_str cook_array_from_str_array "$cook_array_from_str_str"
 }
 cook::parse() {
-    local -n cook_parse_options_ref="$1"
-    local -r cook_parse_options_str="$2"
-    io::parse cook_parse_options_ref "$cook_parse_options_str"
+    local -n cook_parse_inputs_ref="$1"
+    local -r cook_parse_inputs_str="$2"
+    io::parse cook_parse_inputs_ref "$cook_parse_inputs_str"
 }
 
 cook::clean() {

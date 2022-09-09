@@ -18,7 +18,7 @@ declare -a params
 ############################################
 
 # Configure your parameters here
-declare -A options=(
+declare -A inputs=(
     [p,param]="--profile" [p,value]="${AWS_PROFILE:-}" [p,short]="-p" [p,required]=true [p,desc]="aws profile"
 )
 
@@ -37,7 +37,7 @@ Usage and Examples
     $script_name
 
 
-$(cook::usage options)
+$(cook::usage inputs)
 USAGE
 )
 
@@ -68,8 +68,8 @@ run() (
 self() (
     declare -a args=( "$@" )
 
-    if [[ -n "${options_str:+set}" ]]; then
-        cook::parse options "$options_str"
+    if [[ -n "${inputs_str:+set}" ]]; then
+        cook::parse inputs "$inputs_str"
     fi
 
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
@@ -77,7 +77,7 @@ self() (
     elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
         return 0
     else 
-        cook::process options args params && run
+        cook::process inputs args params && run
     fi
 )
 

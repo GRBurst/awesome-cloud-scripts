@@ -20,17 +20,17 @@ common::get_keys_matrix() {
 }
 
 common::get_variable_from_param() (
-    local -rn get_variable_options="$1"
+    local -rn get_variable_inputs="$1"
     local param="$2"
     local res=""
 
     declare -A rows
     declare -A cols
 
-    common::get_keys_matrix get_variable_options rows cols
+    common::get_keys_matrix get_variable_inputs rows cols
     for var in "${!rows[@]}"; do
-        if [[ "$param" == "${get_variable_options[$var,param]}" ]] \
-            || [[ "$param" == "${get_variable_options[$var,short]:-}" ]]; then 
+        if [[ "$param" == "${get_variable_inputs[$var,param]}" ]] \
+            || [[ "$param" == "${get_variable_inputs[$var,short]:-}" ]]; then 
             res="$var"
         fi
     done

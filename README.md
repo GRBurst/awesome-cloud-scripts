@@ -31,9 +31,9 @@ bash ./template.sh
 Some definitions:
 | name           | description                                            |
 | ---------------- | ------------------------------------------------------ |
-| input            | parameter or value                                     |
-| parameter      | short or long provided option, e.g. `--name` or `-n`   |
-| value / argument | argument for the script, optional preceeding a pameter |
+| input            | parameter or argument for the script                   |
+| parameter        | short or long provided input, e.g. `--name` or `-n`   |
+| value / argument | argument for a parameter                               |
 
 Example:
 `myscript.sh -f <filename> --enable-logs <foo> <bar>`
@@ -48,7 +48,7 @@ Parameter types
 | ---------- | ---------------- | ----- | --------------------------------------------------------- |
 | named      | yes              | n     | named parameter followed by value, e.g. `--named <value>` |
 | anonym     | no               | 1     | value without no preceeding parameter                     |
-| flag       | always           | 0     | single flag to toggle options, e.g. --my-flag             |
+| flag       | always           | 0     | single flag to toggle inputs, e.g. --my-flag             |
 
 
 # Related

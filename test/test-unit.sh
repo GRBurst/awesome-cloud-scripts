@@ -5,7 +5,7 @@ set -Eeuo pipefail
 declare script_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$script_path/../bin/script-cook.sh"
 
-declare -A options=(
+declare -A inputs=(
     [d,param]="--desc"            [d,short]="-d" [d,required]=true  [d,desc]="description"
     [e,param]="--expected-result" [e,short]="-e" [e,required]=true  [e,desc]="result message"
     [p,param]="--parameters"      [p,short]="-p" [p,required]=false [p,desc]="parameters"
@@ -35,7 +35,7 @@ Usage and Examples
     --parameters "-p1 foo -e1 bar"
 
 
-$(cook::usage options)
+$(cook::usage inputs)
 USAGE
 )
 
@@ -65,9 +65,9 @@ self() (
     declare -a args=( "$@" )
     if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
         usage
-    elif (cook::check options args); then
+    elif (cook::check inputs args); then
 
-        cook::process options args params && run
+        cook::process inputs args params && run
         cook::clean
     fi
 

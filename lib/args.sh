@@ -31,31 +31,31 @@ args::assign() {
 }
 
 args::fill_default() {
-    local -n fill_default_options_ref="$1"
+    local -n fill_default_inputs_ref="$1"
     local var="$2"
     local par="$3"
     for arg in required arity tpe; do
-        if [[ -z "${fill_default_options_ref[$var,$arg]:+set}" ]]; then
-            fill_default_options_ref+=( [$var,$arg]="${args_defaults[$arg]}" )
+        if [[ -z "${fill_default_inputs_ref[$var,$arg]:+set}" ]]; then
+            fill_default_inputs_ref+=( [$var,$arg]="${args_defaults[$arg]}" )
         fi
     done
-    if [[ -z "${fill_default_options_ref[$var,desc]:+set}" ]]; then
-        fill_default_options_ref+=( [$var,desc]="${fill_default_options_ref[$var,param]:-$par}" )
+    if [[ -z "${fill_default_inputs_ref[$var,desc]:+set}" ]]; then
+        fill_default_inputs_ref+=( [$var,desc]="${fill_default_inputs_ref[$var,param]:-$par}" )
     fi
 
 }
 
 args::configure() {
-    local -n _configure_options="$1"
+    local -n _configure_inputs="$1"
     local -n _configure_args="$2"
 
-    if (( ${#_configure_args[@]} == 0 )) || (( ${#_configure_options[@]} == 0)); then
+    if (( ${#_configure_args[@]} == 0 )) || (( ${#_configure_inputs[@]} == 0)); then
         return 0
     fi
 
-    declare -A _configure_options_rows
-    declare -A _configure_options_cols
-    common::get_keys_matrix _configure_options _configure_options_rows _configure_options_cols
+    declare -A _configure_inputs_rows
+    declare -A _configure_inputs_cols
+    common::get_keys_matrix _configure_inputs _configure_inputs_rows _configure_inputs_cols
 
     local total_args_length="${#_configure_args[@]}"
     local -i i=0
@@ -65,19 +65,19 @@ args::configure() {
 
         # Get current variable for parameter
         local var
-        var="$(common::get_variable_from_param _configure_options "$user_argument")"
+        var="$(common::get_variable_from_param _configure_inputs "$user_argument")"
 
-        args::fill_default _configure_options "$var" "$user_argument"
+        args::fill_default _configure_inputs "$var" "$user_argument"
 
-        if [[ "${_configure_options[$var,tpe]:-}" == "flag" ]]; then
-                args::assign _configure_options "$var" "true" || return 1
+        if [[ "${_configure_inputs[$var,tpe]:-}" == "flag" ]]; then
+                args::assign _configure_inputs "$var" "true" || return 1
                 ((i++))
         else
-            local user_arg_arity=${_configure_options[$var,arity]:-1}
+            local user_arg_arity=${_configure_inputs[$var,arity]:-1}
             local -i j=1
             while ((j <= user_arg_arity)); do
-                io::print_debug "args::assign _configure_options $var ${_configure_args[$((i+j))]:-}"
-                args::assign _configure_options "$var" "${_configure_args[$((i+j))]:-}" || return 1
+                io::print_debug "args::assign _configure_inputs $var ${_configure_args[$((i+j))]:-}"
+                args::assign _configure_inputs "$var" "${_configure_args[$((i+j))]:-}" || return 1
                 ((j++))
             done
             (( i=i+user_arg_arity+1 ))
@@ -158,15 +158,15 @@ args::get_values_str() {
 }
 
 args::process() {
-    local -n process_options="$1"
+    local -n process_inputs="$1"
     local -n process_args="$2"
     local -n process_params="$3"
 
     io::print_debug "Start configure"
-    args::configure process_options process_args || (io::print_debug "configure terminated with $?" && return 1)
+    args::configure process_inputs process_args || (io::print_debug "configure terminated with $?" && return 1)
 
     io::print_debug "Start translate"
-    args::translate process_options              || (io::print_debug "translate terminated with $?" && return 1)
+    args::translate process_inputs              || (io::print_debug "translate terminated with $?" && return 1)
 
     io::print_debug "Start get"
     args::get       process_params               || (io::print_debug "get_args terminated with $?"  && return 1)

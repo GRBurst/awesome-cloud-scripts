@@ -48,17 +48,17 @@ io::print_section_usage() (
 )
 
 io::generate_usage() (
-    local -rn genenrate_usage_options_ref="$1"
+    local -rn genenrate_usage_inputs_ref="$1"
     local -A rows cols
 
-    common::get_keys_matrix genenrate_usage_options_ref rows cols
+    common::get_keys_matrix genenrate_usage_inputs_ref rows cols
 
     local required optional required_env optional_env
     local -i arg_length=0 short_length=0
 
     for var in "${!rows[@]}"; do
-        local short="${genenrate_usage_options_ref[$var,short]:-}"
-        local arg="${genenrate_usage_options_ref[$var,param]:-}"
+        local short="${genenrate_usage_inputs_ref[$var,short]:-}"
+        local arg="${genenrate_usage_inputs_ref[$var,param]:-}"
         if (( ${#short} > short_length )); then
             (( short_length=${#short} ))
         fi
@@ -68,39 +68,39 @@ io::generate_usage() (
     done
 
     for var in "${!rows[@]}"; do
-        if [[ -n "${genenrate_usage_options_ref[$var,value]+set}" ]]; then
-            if [[ "${genenrate_usage_options_ref[$var,required]:-false}" == "true" ]]; then
+        if [[ -n "${genenrate_usage_inputs_ref[$var,value]+set}" ]]; then
+            if [[ "${genenrate_usage_inputs_ref[$var,required]:-false}" == "true" ]]; then
                 required_env+="$(\
                     io::print_var_usage \
-                    "${genenrate_usage_options_ref[$var,short]:-}" \
-                    "${genenrate_usage_options_ref[$var,param]}" \
-                    "${genenrate_usage_options_ref[$var,desc]}" \
+                    "${genenrate_usage_inputs_ref[$var,short]:-}" \
+                    "${genenrate_usage_inputs_ref[$var,param]}" \
+                    "${genenrate_usage_inputs_ref[$var,desc]}" \
                     "variable or argument" \
                     $short_length $arg_length)"
             else
                 optional_env+="$(\
                     io::print_var_usage \
-                    "${genenrate_usage_options_ref[$var,short]:-}" \
-                    "${genenrate_usage_options_ref[$var,param]}" \
-                    "${genenrate_usage_options_ref[$var,desc]}" \
+                    "${genenrate_usage_inputs_ref[$var,short]:-}" \
+                    "${genenrate_usage_inputs_ref[$var,param]}" \
+                    "${genenrate_usage_inputs_ref[$var,desc]}" \
                     "variable or argument" \
                     $short_length $arg_length)"
             fi
         else
-            if [[ "${genenrate_usage_options_ref[$var,required]:-false}" == "true" ]]; then
+            if [[ "${genenrate_usage_inputs_ref[$var,required]:-false}" == "true" ]]; then
                 required+="$(\
                     io::print_var_usage \
-                    "${genenrate_usage_options_ref[$var,short]:-}" \
-                    "${genenrate_usage_options_ref[$var,param]}" \
-                    "${genenrate_usage_options_ref[$var,desc]}" \
+                    "${genenrate_usage_inputs_ref[$var,short]:-}" \
+                    "${genenrate_usage_inputs_ref[$var,param]}" \
+                    "${genenrate_usage_inputs_ref[$var,desc]}" \
                     "argument" \
                     $short_length $arg_length)"
             else
                 optional+="$(\
                     io::print_var_usage \
-                    "${genenrate_usage_options_ref[$var,short]:-}" \
-                    "${genenrate_usage_options_ref[$var,param]}" \
-                    "${genenrate_usage_options_ref[$var,desc]}" \
+                    "${genenrate_usage_inputs_ref[$var,short]:-}" \
+                    "${genenrate_usage_inputs_ref[$var,param]}" \
+                    "${genenrate_usage_inputs_ref[$var,desc]}" \
                     "argument" \
                     $short_length $arg_length)"
             fi
@@ -123,13 +123,13 @@ USAGE
     echo "$usage_string"
 )
 
-io::print_option_matrix() (
-    local -rn print_option_matrix_options_ref="$1"
-    local -rn print_option_matrix_error_vars_ref="$2"
+io::print_input_matrix() (
+    local -rn print_input_matrix_inputs_ref="$1"
+    local -rn print_input_matrix_error_vars_ref="$2"
 
     local -A rows cols
 
-    common::get_keys_matrix print_option_matrix_options_ref rows cols
+    common::get_keys_matrix print_input_matrix_inputs_ref rows cols
 
 
     local -i var_length=0
@@ -143,9 +143,9 @@ io::print_option_matrix() (
         for arg in "${!cols[@]}"; do
             local -i cell_length=0
             (( cell_length=${var_length}+${#arg}+3 ))
-            if [[ -z "${print_option_matrix_options_ref[$var,$arg]+set}" ]]; then
+            if [[ -z "${print_input_matrix_inputs_ref[$var,$arg]+set}" ]]; then
                 printf "%${cell_length}s" "   "
-            elif [[ "${print_option_matrix_error_vars_ref[*]}" =~ "$var" ]]; then
+            elif [[ "${print_input_matrix_error_vars_ref[*]}" =~ "$var" ]]; then
                 printf "\e[1m\e[31m%${cell_length}s\e[0m" "[$var,$arg]"
             else
                 printf "%${cell_length}s" "[$var,$arg]"
@@ -158,16 +158,16 @@ io::print_option_matrix() (
 )
 
 io::print_values_matrix() (
-    local -rn print_values_matrix_options_ref="$1"
+    local -rn print_values_matrix_inputs_ref="$1"
 
     local -A rows cols
 
-    common::get_keys_matrix print_values_matrix_options_ref rows cols
+    common::get_keys_matrix print_values_matrix_inputs_ref rows cols
 
     local -A cols_length
     for arg in "${!cols[@]}"; do
         for var in "${!rows[@]}"; do
-            local val="${print_values_matrix_options_ref[$var,$arg]:-}"
+            local val="${print_values_matrix_inputs_ref[$var,$arg]:-}"
             local -i length="${cols_length[$arg]:-0}"
             if (( "${#val}" >= length )); then # >= to always set it
                 cols_length+=( [$arg]=${#val} )
@@ -191,10 +191,10 @@ io::print_values_matrix() (
 
     for var in "${!rows[@]}"; do
         for arg in "${!cols[@]}"; do
-            if [[ -z "${print_values_matrix_options_ref[$var,$arg]+set}" ]]; then
+            if [[ -z "${print_values_matrix_inputs_ref[$var,$arg]+set}" ]]; then
                 printf "%${cols_length[$arg]}s" " "
             else
-                printf "%${cols_length[$arg]}s" "${print_values_matrix_options_ref[$var,$arg]:-}"
+                printf "%${cols_length[$arg]}s" "${print_values_matrix_inputs_ref[$var,$arg]:-}"
             fi
             printf " | "
         done
@@ -204,33 +204,33 @@ io::print_values_matrix() (
 )
 
 io::parse() {
-    local -n io_parse_options_ref="$1"
-    local -r io_parse_options_str="$2"
+    local -n io_parse_inputs_ref="$1"
+    local -r io_parse_inputs_str="$2"
 
-    cleaned_options_str=$(echo "$io_parse_options_str" | grep -v "^#" | sed 's/ //g')
-    delim="${cleaned_options_str:0:1}"
-    prep_options="$(echo "${cleaned_options_str}" | sed -e 's/^|*//g' -e 's/|*$//g' -e 's/^[[:blank:]]*//g' -e 's/[[:blank:]]*$//g' | tr -s '[:space:]')"
+    cleaned_inputs_str=$(echo "$io_parse_inputs_str" | grep -v "^#" | sed 's/ //g')
+    delim="${cleaned_inputs_str:0:1}"
+    prep_inputs="$(echo "${cleaned_inputs_str}" | sed -e 's/^|*//g' -e 's/|*$//g' -e 's/^[[:blank:]]*//g' -e 's/[[:blank:]]*$//g' | tr -s '[:space:]')"
 
-    readarray -d "$delim" -s 1 -t columns < <(printf '%s' "$( echo -n "${prep_options}" | head -n 1)" )
+    readarray -d "$delim" -s 1 -t columns < <(printf '%s' "$( echo -n "${prep_inputs}" | head -n 1)" )
 
     readarray -d ' ' -t myids < <(printf '%s' "$(while read l; do
         printf "${l}" | cut -d "$delim" -f 1
-    done < <( echo "$prep_options" | tail -n +2 ) | tr '\n' ' ' | tr -s '[:space:]' )" )
+    done < <( echo "$prep_inputs" | tail -n +2 ) | tr '\n' ' ' | tr -s '[:space:]' )" )
 
     readarray -d '|' -t myarray < <(printf '%s' "$(while read l; do
         printf "${l}${delim}" | cut -d "$delim" -f 2-
-    done < <( echo "$prep_options" | tail -n +2 ) | tr -d '\n' )" )
+    done < <( echo "$prep_inputs" | tail -n +2 ) | tr -d '\n' )" )
 
     local -i idx=0
     for id in "${myids[@]}"; do
         for col in "${columns[@]}"; do
             io::print_debug "$(printf "%18s " "[$id,$col]=${myarray[$idx]:-}")"
             if [[ "$col" != "value" ]] && [[ -n "${myarray["$idx"]:+set}" ]]; then
-                io_parse_options_ref+=( ["$id","$col"]="${myarray["$idx"]}")
+                io_parse_inputs_ref+=( ["$id","$col"]="${myarray["$idx"]}")
             elif [[ "$col" == "value" ]] && [[ -n "${myarray["$idx"]:+set}" ]]; then
                 local -n io_parse_env_var="${myarray[$idx]}"
                 if [[ -n "${io_parse_env_var:+set}" ]]; then
-                    io_parse_options_ref+=( ["$id","$col"]="$(echo "${io_parse_env_var}" )" )
+                    io_parse_inputs_ref+=( ["$id","$col"]="$(echo "${io_parse_env_var}" )" )
                 fi
             fi
             ((idx+=1))
