@@ -9,7 +9,7 @@ common::get_keys_matrix() {
     local -n _get_keys_matrix_cols="$3"
     # We create two arrays for the rows and column keys that doesn't contain duplicates
     for var in "${!_get_keys_matrix_assoc[@]}"; do
-        IFS=',' read -ra _key_arr <<< "${var}"
+        readarray -d ',' -t _key_arr <<< "${var}"
         if [[ -n "${_key_arr[0]+set}" ]]; then
             _get_keys_matrix_rows["${_key_arr[0]}"]=1
         fi
