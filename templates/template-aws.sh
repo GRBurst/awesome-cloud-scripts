@@ -67,7 +67,6 @@ run() (
 
 readonly usage inputs_str
 
-declare -p inputs
 # We are passing the whole data to cook::run, where
 # 1. run is your function defined above
 # 2. inputs (array) or inputs_str (string) are the possible inputs you defined
