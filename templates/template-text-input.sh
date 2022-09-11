@@ -6,12 +6,15 @@
 # add '#' for the line / shebangs above after finishing development of the script.
 
 set -Eeuo pipefail
+declare -r VERSION="1.0.0"
 
-source "$(dirname "${BASH_SOURCE[0]}")/../bin/script-cook.sh"
+declare script_path="$(dirname "${BASH_SOURCE[0]}")"
+source "$script_path/../bin/script-cook.sh"
 
-# This will contain the resulting parameters of your command
-declare -a params
-declare -A inputs
+declare -A inputs  # Define your inputs below
+declare inputs_str # Alternatively define them in a string matrix
+declare usage      # Define your usage + examples below
+declare -a params  # Holds all input parameter
 
 ############################################
 ########## BEGIN OF CUSTOMISATION ##########
@@ -30,7 +33,7 @@ declare -A inputs
 # If you don't want it to be set by an environment variable (so it can only be configured by parameters),
 # you must not (!) define it for the build in evaluation to work.
 #   -> In our case: [p1,value], [p2,value] and [f,value] are not defined in the array
-declare -r inputs_str=$(cat <<INPUTSTR
+inputs_str=$(cat <<INPUTSTR
 # delimiter is the first character in your table to split the variables.
 # here, it is '|', because it is the first character in the column name row,
 # which is starting with ' | id | tpe | ... '
@@ -46,23 +49,18 @@ declare -r inputs_str=$(cat <<INPUTSTR
 INPUTSTR
 )
 
-
-# Define your usage and help message here
-usage() (
-    local script_name="${0##*/}"
-    cat <<-USAGE
+# Define your usage and help message here.
+# The script will append a generated parameter help message based on your inputs.
+# This will be printed if the `--help` or `-h` flag is used.
+usage=$(cat <<-USAGE
 Explain what this script does and exit.
 Describes the nix-shell parameter and provides template for scripts.
-
 
 Usage and Examples
 ---------
 
 - Print information about nix-shell parameters:
-    $script_name
-
-
-$(cook::usage inputs)
+    template-text-input.sh --env1 foo -p1 bar
 USAGE
 )
 
@@ -84,7 +82,6 @@ run() (
     hello -g "hello $(cook::get_str p1)"
 
     # Or use all the parameter with the defined array params
-    declare -p params
     hello -g "hello ${params[*]}"
 
 )
@@ -94,23 +91,12 @@ run() (
 ########## END OF CUSTOMISATION ###########
 ###########################################
 
-# This is the base frame and it shouldn't be necessary to touch it
-self() (
-    declare -a args=( "$@" )
+readonly usage inputs_str
 
-    if [[ -n "${inputs_str:+set}" ]]; then
-        cook::parse inputs "$inputs_str"
-    fi
-
-    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
-        usage
-    elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
-        echo "1.0.0"
-        return 0
-    else
-        cook::process inputs args params && run
-        cook::clean
-    fi
-)
-
-self "$@"
+# We are passing the whole data to cook::run, where
+# 1. run is your function defined above
+# 2. inputs (array) or inputs_str (string) are the possible inputs you defined
+# 3. params is the resulting array containing all inputs provided
+# 4. usage is your usage string and will be enriched + printed on help
+# 5. $@ is the non-checked input for the script
+cook::run run inputs params "${inputs_str:-}" "${usage:-}" "$@"

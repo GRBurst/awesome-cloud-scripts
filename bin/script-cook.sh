@@ -30,12 +30,8 @@ fi
 
 cook::usage() {
     local -rn cook_usage_inputs="$1"
-    io::generate_usage cook_usage_inputs
-}
-cook::check() {
-    local -n cook_check_requirements_inputs="$1"
-    local -n cook_check_requirements_arg="$2"
-    check::requirements cook_check_requirements_inputs cook_check_requirements_arg
+    local -r cook_usage_str="$2"
+    io::generate_usage cook_usage_inputs "$cook_usage_str"
 }
 cook::process() {
     local -n script_cook_inputs="$1"
@@ -75,6 +71,32 @@ cook::parse() {
     io::parse cook_parse_inputs_ref "$cook_parse_inputs_str"
 }
 
+cook::run() {
+    local cook_run_f=$1
+    local -n cook_run_inputs_ref="$2"
+    local -n cook_run_params_ref="$3"
+    local cook_inputs_str="$4"
+    local cook_usage_str="$5"
+    local -a cook_run_args=( "${@:6}" )
+
+    if [[ -n "${cook_inputs_str:+set}" ]]; then
+        cook::parse inputs "$cook_inputs_str"
+    fi
+
+    if [[ "${cook_run_args[0]:-}" == "help" ]] || [[ "${cook_run_args[0]:-}" == "--help" ]]; then
+        cook::usage cook_run_inputs_ref "$cook_usage_str"
+        return 0
+    elif [[ "${cook_run_args[0]:-}" == "version" ]] || [[ "${cook_run_args[0]:-}" == "--version" ]]; then
+        echo "Version: ${VERSION:-undefined}"
+        return 0
+    else
+        cook::process cook_run_inputs_ref cook_run_args cook_run_params_ref
+        ( $cook_run_f )
+    fi
+
+    cook::clean
+}
+
 cook::clean() {
     unset SCRIPT_COOK_COMMON_LOADED
     unset SCRIPT_COOK_IO_LOADED
@@ -84,6 +106,7 @@ cook::clean() {
 cook::on_err() {
     cook::clean
     io::print_debug_error "Error: (${1:-}) occurred on line ${2:-} in ${3:-}"
+    exit 1
 }
 
 trap 'cook::on_err $? $LINENO ${BASH_SOURCE##*/}' ERR

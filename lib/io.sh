@@ -49,6 +49,7 @@ io::print_section_usage() (
 
 io::generate_usage() (
     local -rn genenrate_usage_inputs_ref="$1"
+    local -r genenrate_usage_str="$2"
     local -A rows cols
 
     common::get_keys_matrix genenrate_usage_inputs_ref rows cols
@@ -109,6 +110,9 @@ io::generate_usage() (
 
     local usage_string
     usage_string="$(cat <<-USAGE
+$genenrate_usage_str
+
+
 Arguments and Environment
 ---------
 

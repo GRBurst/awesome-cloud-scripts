@@ -1,16 +1,20 @@
 #! /usr/bin/env nix-shell
 #! nix-shell -i bash
 #! nix-shell -p awscli2 aws-vault
-#! nix-shell --pure
 #! nix-shell --keep AWS_PROFILE --keep DEBUG
+##! nix-shell --pure
 # add '#' for the 2 shebangs above after finishing development of the script.
 
 set -Eeuo pipefail
+declare -r VERSION="1.0.0"
 
-source "$(dirname "${BASH_SOURCE[0]}")/../bin/script-cook.sh"
+declare -r script_path="$(dirname "${BASH_SOURCE[0]}")"
+source "$script_path/../bin/script-cook.sh"
 
-# This will contain the resulting parameters of your command
-declare -a params
+declare -A inputs  # Define your inputs below
+declare inputs_str # Alternatively define them in a string matrix
+declare usage      # Define your usage + examples below
+declare -a params  # Holds all input parameter
 
 
 ############################################
@@ -18,14 +22,14 @@ declare -a params
 ############################################
 
 # Configure your parameters here
-declare -A inputs=(
+inputs=(
     [p,param]="--profile" [p,value]="${AWS_PROFILE:-}" [p,short]="-p" [p,required]=true [p,desc]="aws profile"
 )
 
-# Define your usage and help message here
-usage() (
-    local script_name="${0##*/}"
-    cat <<-USAGE
+# Define your usage and help message here.
+# The script will append a generated parameter help message based on your inputs.
+# This will be printed if the `--help` or `-h` flag is used.
+usage=$(cat <<-USAGE
 Template for AWS scripts.
 Please have a look at template.sh as well.
 
@@ -34,10 +38,7 @@ Usage and Examples
 ---------
 
 - Print information about aws script call:
-    $script_name
-
-
-$(cook::usage inputs)
+    ./template-aws.sh -p ${AWS_PROFILE:-<aws_profile>}
 USAGE
 )
 
@@ -64,21 +65,14 @@ run() (
 ########### END OF CUSTOMISATION ###########
 ############################################
 
-# This is the base frame and it shouldn't be necessary to touch it
-self() (
-    declare -a args=( "$@" )
+readonly usage inputs_str
 
-    if [[ -n "${inputs_str:+set}" ]]; then
-        cook::parse inputs "$inputs_str"
-    fi
+declare -p inputs
+# We are passing the whole data to cook::run, where
+# 1. run is your function defined above
+# 2. inputs (array) or inputs_str (string) are the possible inputs you defined
+# 3. params is the resulting array containing all inputs provided
+# 4. usage is your usage string and will be enriched + printed on help
+# 5. $@ is the non-checked input for the script
+cook::run run inputs params "${inputs_str:-}" "${usage:-}" "$@"
 
-    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
-        usage
-    elif [[ "${1:-}" == "version" ]] || [[ "${1:-}" == "--version" ]]; then
-        return 0
-    else 
-        cook::process inputs args params && run
-    fi
-)
-
-self "$@"

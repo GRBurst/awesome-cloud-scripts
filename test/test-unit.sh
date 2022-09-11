@@ -1,41 +1,49 @@
-#! /usr/bin/env bash
+#! /usr/bin/env nix-shell
+#! nix-shell -i bash
+#! nix-shell -p nix hello
+#! nix-shell --keep ENV1 --keep ENV2 --keep DEBUG
+#! nix-shell --pure
 
 set -Eeuo pipefail
+declare -r VERSION="1.0.0"
 
 declare script_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$script_path/../bin/script-cook.sh"
 
-declare -A inputs=(
+declare -A inputs  # Define your inputs below
+declare inputs_str # Alternatively define them in a string matrix
+declare usage      # Define your usage + examples below
+declare -a params  # Holds all input parameter
+
+############################################
+########## BEGIN OF CUSTOMISATION ##########
+############################################
+
+inputs=(
     [d,param]="--desc"            [d,short]="-d" [d,required]=true  [d,desc]="description"
     [e,param]="--expected-result" [e,short]="-e" [e,required]=true  [e,desc]="result message"
     [p,param]="--parameters"      [p,short]="-p" [p,required]=false [p,desc]="parameters"
 )
-# This will contain the resulting parameters of your command
-declare -a params
 
-# Define your usage and help message here
-usage() (
-    local script_name="${0##*/}"
-    cat <<-USAGE
+# Define your usage and help message here.
+# The script will append a generated parameter help message based on your inputs.
+# This will be printed if the `--help` or `-h` flag is used.
+usage=$(cat <<-USAGE
 Runs template.sh with provided parameters and test for the expected result.
-
 
 Usage and Examples
 ---------
 
 - Run the script without parameters:
-    $script_name \\
+    test-unit.sh \\
     --desc "missing par1 par" \\
     --expected-result "[ERROR] PAR1 parameter required but not provided."
 
 - Run the script with all required parameters:
-    $script_name \\
+    test-unit.sh \\
     --desc "template" \\
     --expected-result "hello --par1 foo --env1 bar" \\
     --parameters "-p1 foo -e1 bar"
-
-
-$(cook::usage inputs)
 USAGE
 )
 
@@ -60,17 +68,8 @@ run() (
 )
 
 
-# This is the base frame and it shouldn't be necessary to touch it
-self() (
-    declare -a args=( "$@" )
-    if [[ "${1:-}" == "help" ]] || [[ "${1:-}" == "--help" ]]; then
-        usage
-    elif (cook::check inputs args); then
-
-        cook::process inputs args params && run
-        cook::clean
-    fi
-
-)
-
-self "$@"
+###########################################
+########## END OF CUSTOMISATION ###########
+###########################################
+readonly usage inputs_str
+cook::run run inputs params "${inputs_str:-}" "${usage:-}" "$@"
