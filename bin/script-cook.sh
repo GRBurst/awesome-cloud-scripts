@@ -96,6 +96,9 @@ cook::run() {
 
     cook::clean
 }
+cook::name() {
+    echo "${0##*/}"
+}
 
 cook::clean() {
     unset SCRIPT_COOK_COMMON_LOADED

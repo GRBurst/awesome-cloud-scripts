@@ -21,7 +21,7 @@ declare -a params  # Holds all input parameter
 ########## BEGIN OF CUSTOMISATION ##########
 ############################################
 
-# Configure your parameters here
+# Configure your inputs, parameters and arguments here.
 inputs=(
     [p,param]="--profile" [p,value]="${AWS_PROFILE:-}" [p,short]="-p" [p,required]=true [p,desc]="aws profile"
 )
@@ -38,7 +38,7 @@ Usage and Examples
 ---------
 
 - Print information about aws script call:
-    ./template-aws.sh -p ${AWS_PROFILE:-<aws_profile>}
+    $(cook::name) -p ${AWS_PROFILE:-<aws_profile>}
 USAGE
 )
 

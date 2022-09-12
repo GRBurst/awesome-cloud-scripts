@@ -20,7 +20,7 @@ declare -a params  # Holds all input parameter
 ########## BEGIN OF CUSTOMISATION ##########
 ############################################
 
-# Configure your variables and parameters here.
+# Configure your inputs, parameters and arguments here.
 # We destinguish between variables and attributes and interprete the key of as 2-dim arrays / matrix.
 #   -> In our case: e1, e2, p1, p2 and f are our variables
 #   -> In our case: arg, value, short, required, desc, tpe and arity are our attributes
@@ -60,7 +60,7 @@ Usage and Examples
 ---------
 
 - Print information about nix-shell parameters:
-    template-text-input.sh --env1 foo -p1 bar
+    $(cook::name) --env1 foo -p1 bar
 USAGE
 )
 
