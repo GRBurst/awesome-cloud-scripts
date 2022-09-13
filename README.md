@@ -1,7 +1,7 @@
 ﻿# Script-Cook
 
-Single file library (pure bash) that generates all the boilerplate for your bash scripts.
-By providing necessary information using an associative array, you get the following:
+Simple bash library that generates all the boilerplate for your bash scripts.
+By providing necessary information using an associative array (old way) or a string matrix that follows a convention (new way), you get the following:
 
 - Check if all required arguments are provided
 - Check if the arguments are followed by the correct number of values
