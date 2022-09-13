@@ -12,6 +12,11 @@ It should cover all common use cases, but some corner cases may not be covered, 
 
 Feel free to open an issue if you find yourself in need of a missing feature, if you have an idea to simplify its usage or if you have an idea to improve the lib in gereral.
 
+## Requirements
+- coreutils (cat, dirname, echo, printf, tr)
+- gnu grep
+- gnu sed
+
 ## Run the template script
 
 If you have `nix` and `nix-shell` installed on your system, you can run the scripts directly using:

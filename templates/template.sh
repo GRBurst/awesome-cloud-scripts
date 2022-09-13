@@ -21,6 +21,7 @@ declare inputs_str # Alternatively define them in a string matrix
 declare usage      # Define your usage + examples below
 declare -a params  # Holds all input parameter
 
+
 ############################################
 ########## BEGIN OF CUSTOMISATION ##########
 ############################################
