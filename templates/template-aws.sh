@@ -2,14 +2,19 @@
 #! nix-shell -i bash
 #! nix-shell -p awscli2 aws-vault
 #! nix-shell --keep AWS_PROFILE --keep DEBUG
-##! nix-shell --pure
+#! nix-shell --pure
 # add '#' for the 2 shebangs above after finishing development of the script.
 
 set -Eeuo pipefail
 declare -r VERSION="1.0.0"
 
 declare -r script_path="$(dirname "${BASH_SOURCE[0]}")"
-source "$script_path/../bin/script-cook.sh"
+# This is for compatibility to run it without a nix-shell
+if command -v script-cook.sh &> /dev/null; then
+    source script-cook.sh
+else
+    source "$script_path/../script-cook/bin/script-cook.sh"
+fi
 
 declare -A inputs  # Define your inputs below
 declare inputs_str # Alternatively define them in a string matrix
