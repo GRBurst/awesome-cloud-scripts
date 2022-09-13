@@ -28,6 +28,8 @@ if (( ${BASH_VERSINFO:-0} < 4 )) || (! declare -A test_assoc_array); then
     exit 1
 fi
 
+shopt -e extglob
+
 cook::usage() {
     local -rn cook_usage_inputs="$1"
     local -r cook_usage_str="$2"
