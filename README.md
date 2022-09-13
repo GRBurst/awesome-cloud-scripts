@@ -12,10 +12,17 @@ It should cover all common use cases, but some corner cases may not be covered, 
 
 Feel free to open an issue if you find yourself in need of a missing feature, if you have an idea to simplify its usage or if you have an idea to improve the lib in gereral.
 
+## Motivation
+Instead of using a bash script generator or similar tools, I like to interact with something that adapts with my needs while I am writing a script.
+Bash generators are a good thing to have when you know which parameters are needed and that those don't change, but you have to rerun them or edit the boilerplate if something changes.
+This small library takes a different approach with a minimal boilerplate in your script.
+By defining your script inputs as a datastructure (e.g. an associative array or an text matrix), all the boilerplate is generated from that datastructure.
+Therefore, your datastructure is the source of truth and the library adapts to it.
+
 ## Requirements
-- coreutils (cat, dirname, echo, printf, tr)
-- gnu grep
-- gnu sed
+- coreutils (`cat`, `dirname`, `echo`, `printf`, `tr`)
+- gnu `grep`
+- gnu `sed`
 
 ## Run the template script
 
