@@ -47,6 +47,7 @@ inputs=(
     [p2,param]="--par2"                        [p2,short]="-p2"                     [p2,desc]="PAR2"       [p2,arity]=2 [p2,required]=false
     [p3,param]="-p3"                                                                [p3,desc]="PAR1" [p3,required]=false
     [f,param]="--flag"                         [f,short]="-f"                       [f,desc]="Switch" [f,tpe]="flag" [f,required]=false
+    [d,param]="--default" [d,value]=123        [d,short]="-d"                      [d,desc]="Default"
 )
 
 # Define your usage and help message here.
