@@ -5,6 +5,7 @@ declare -r SCRIPT_COOK_COMMON_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/common.
 declare -r SCRIPT_COOK_IO_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
 declare -r SCRIPT_COOK_CHECK_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/check.sh"
 declare -r SCRIPT_COOK_ARGS_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/args.sh"
+declare -r SCRIPT_COOK_UTIL_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/util.sh"
 
 
 if [[ "${SCRIPT_COOK_COMMON_LOADED:-}" != "true" ]]; then
@@ -26,6 +27,11 @@ if [[ "${SCRIPT_COOK_ARGS_LOADED:-}" != "true" ]]; then
     source "$SCRIPT_COOK_ARGS_LIB"
 else
     io::print_debug "SCRIPT_COOK_ARGS_LOADED already loaded"
+fi
+if [[ "${SCRIPT_COOK_UTIL_LOADED:-}" != "true" ]]; then
+    source "$SCRIPT_COOK_UTIL_LIB"
+else
+    io::print_debug "SCRIPT_COOK_UTIL_LOADED already loaded"
 fi
 
 unset test_assoc_array
@@ -113,6 +119,7 @@ cook::clean() {
     unset SCRIPT_COOK_IO_LOADED
     unset SCRIPT_COOK_CHECK_LOADED
     unset SCRIPT_COOK_ARGS_LOADED
+    unset SCRIPT_COOK_UTIL_LOADED
 }
 cook::on_err() {
     cook::clean
