@@ -1,23 +1,29 @@
 #! /usr/bin/env bash
 set -Eeuo pipefail
 
+declare -r SCRIPT_COOK_COMMON_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+declare -r SCRIPT_COOK_IO_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
+declare -r SCRIPT_COOK_CHECK_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/check.sh"
+declare -r SCRIPT_COOK_ARGS_LIB="$(dirname "${BASH_SOURCE[0]}")/../lib/args.sh"
+
+
 if [[ "${SCRIPT_COOK_COMMON_LOADED:-}" != "true" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
+    source "$SCRIPT_COOK_COMMON_LIB"
 else
     io::print_debug "SCRIPT_COOK_COMMON_LOADED already loaded"
 fi
 if [[ "${SCRIPT_COOK_IO_LOADED:-}" != "true" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
+    source "$SCRIPT_COOK_IO_LIB"
 else
     io::print_debug "SCRIPT_COOK_IO_LOADED already loaded"
 fi
 if [[ "${SCRIPT_COOK_CHECK_LOADED:-}" != "true" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/../lib/check.sh"
+    source "$SCRIPT_COOK_CHECK_LIB"
 else
     io::print_debug "SCRIPT_COOK_CHECK_LOADED already loaded"
 fi
 if [[ "${SCRIPT_COOK_ARGS_LOADED:-}" != "true" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/../lib/args.sh"
+    source "$SCRIPT_COOK_ARGS_LIB"
 else
     io::print_debug "SCRIPT_COOK_ARGS_LOADED already loaded"
 fi
